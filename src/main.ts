@@ -1,6 +1,21 @@
 import { createApp } from "vue";
 import App from "./App.vue";
-import router from "./router";
-import store from "./store";
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+// import Terminal from "vue-web-terminal";
+import pinia from "@/store/index";
+import { useElementPlus } from "@/plugins/element-plus";
+import "./css/index.css";
+import "element-plus/dist/index.css";
 
-createApp(App).use(store).use(router).mount("#app");
+// import router from "./router";
+// import store from "./store";
+const app = createApp(App);
+
+app.use(pinia);
+
+// app.use(Terminal);
+
+useElementPlus(app);
+
+app.mount("#app");
