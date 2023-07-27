@@ -30,6 +30,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   resizeObserver?.disconnect();
+  chart?.dispose();
 });
 
 function init(): void {

@@ -9,5 +9,6 @@ module.exports = defineConfig({
       .options({ inline: "fallback" });
   },
   parallel: false,
+  publicPath: "./",
   transpileDependencies: true,
 });

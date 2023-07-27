@@ -114,7 +114,7 @@ const handleEndClick = () => {
       type="primary"
       :icon="SuccessFilled"
       :loading="frameStatus === 'pending'"
-      :disabled="frameStatus !== 'stopped'"
+      :disabled="frameStatus !== 'stopped' || !depth"
       @click="handleStartClick"
       >开始</el-button
     >

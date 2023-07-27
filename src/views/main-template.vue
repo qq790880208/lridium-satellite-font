@@ -13,7 +13,11 @@ const store = useStore();
 
 const state = storeToRefs(store);
 
-const currentFrameList = reactive({});
+const dosText = ref("测试开始");
+
+const currentFrameList = reactive({
+  value: "",
+});
 
 const oShowList = reactive({
   img: true,
@@ -50,9 +54,11 @@ watch(state.frameStatus, (value) => {
 
 const play = () => {
   console.info("play");
-  currentFrameList.value = store.remove();
+  // currentFrameList.value = store.remove();
   oShowList.img = false;
   oShowList.dos = true;
+  oShowList.depth = true;
+  oShowList.chart = true;
 };
 
 const stop = () => {
@@ -87,18 +93,26 @@ const handleChartInit = (
       :width="component.width"
     >
       <img class="main-template__image" v-show="oShowList.img" alt="" src="" />
-      <div class="main-template__block" v-show="oShowList.dos">
-        <web-terminal data="测试开始"></web-terminal>
+      <transition name="el-fade-in">
+        <div class="main-template__block" v-show="oShowList.dos">
+          <web-terminal :data="dosText"></web-terminal>
+        </div>
+      </transition>
+      <div class="main-template__block">
+        <transition name="el-fade-in">
+          <swiper-depth v-show="oShowList.depth"></swiper-depth>
+        </transition>
       </div>
-      <swiper-depth
-        class="main-template__block"
-        v-show="oShowList.depth"
-      ></swiper-depth>
-      <echart class="main-template__block" v-show="oShowList.chart"></echart>
-      <verify-result
-        class="main-template__block"
-        v-show="oShowList.result"
-      ></verify-result>
+      <div class="main-template__block">
+        <transition name="el-fade-in">
+          <verify-result v-show="oShowList.result"></verify-result>
+        </transition>
+      </div>
+      <div class="main-template__block">
+        <transition name="el-fade-in">
+          <echart v-show="oShowList.chart"></echart>
+        </transition>
+      </div>
     </base-chart-background>
   </template>
 </template>
@@ -110,9 +124,11 @@ const handleChartInit = (
     width: 100%;
   }
   &__block {
-    padding: 25px;
+    margin: 25px;
+    position: relative;
     height: calc(50% - 50px);
     width: calc(50% - 50px);
+    z-index: 2;
   }
 }
 </style>

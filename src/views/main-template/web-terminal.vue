@@ -8,7 +8,7 @@ interface terminalProps {
 
 const props = defineProps<terminalProps>();
 
-const terminal = ref().value;
+const terminalInstance = ref();
 
 const handleTerminal = (name: string) => {
   console.info(name);
@@ -16,20 +16,25 @@ const handleTerminal = (name: string) => {
 
 watch(
   () => props.data,
-  () => {
-    terminal && terminal.push("");
+  (val) => {
+    console.info(terminalInstance.value);
+    terminalInstance.value.pushMessage(val);
+    terminalInstance.value.execute(val);
   }
 );
 </script>
 
 <template>
   <terminal
-    ref="terminal"
+    ref="terminalInstance"
     name="my-terminal"
     title="dos"
-    init-log="系统正在初始化，请稍候..."
+    context="dos"
+    :init-log="[
+      { type: 'normal', class: 'info', content: '系统正在初始化，请稍候...' },
+    ]"
     :show-header="false"
-    @init-compolete="handleTerminal"
+    @initComplete="handleTerminal"
   ></terminal>
 </template>
 

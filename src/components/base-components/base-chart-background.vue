@@ -66,6 +66,7 @@ const computedWidth = computed(() => {
     padding: 12px;
     position: relative;
     height: calc(100% - 64px);
+    flex-wrap: wrap;
   }
   &::before,
   &::after {
