@@ -17,9 +17,12 @@ const handleTerminal = (name: string) => {
 watch(
   () => props.data,
   (val) => {
-    console.info(terminalInstance.value);
-    terminalInstance.value.pushMessage(val);
+    // console.info(terminalInstance.value);
+    // terminalInstance.value.pushMessage(val);
     terminalInstance.value.execute(val);
+    if('end'.includes(val)) {
+      terminalInstance.value.clearLog()
+    }
   }
 );
 </script>

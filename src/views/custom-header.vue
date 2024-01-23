@@ -2,7 +2,7 @@
 import dayjs from "dayjs";
 import isoWeek from "dayjs/plugin/isoWeek";
 import { storeToRefs } from "pinia";
-import { onBeforeUnmount, ref } from "vue";
+import { computed, onBeforeUnmount, ref, watch } from "vue";
 import { SuccessFilled, CircleCloseFilled } from "@element-plus/icons-vue";
 import { useStore } from "@/store/modules";
 
@@ -18,14 +18,14 @@ const state = storeToRefs(store);
 
 const frameStatus = state.frameStatus;
 
-const depth = ref<number>();
+const depth = state.depth;
 
 const selectMenuID = ref(1);
 
 const aMenuList = ref([
   {
     id: 1,
-    name: "数据大屏",
+    name: "铱星系统",
   },
   {
     id: 2,
@@ -52,6 +52,11 @@ const aDepthList = ref([
     label: 3,
     value: 3,
   },
+  // {
+  //   id: 2,
+  //   label: 4,
+  //   value: 4,
+  // },
   {
     id: 4,
     label: 5,
@@ -63,6 +68,11 @@ const aDepthList = ref([
     value: 7,
   },
 ]);
+
+const selectMenuName = computed(() => {
+  return aMenuList.value.find(item => item.id === selectMenuID.value)?.name
+})
+
 const clock = () => {
   time.value = dayjs().format("HH:mm:ss");
 };
@@ -73,8 +83,12 @@ onBeforeUnmount(() => {
   intervalId && clearInterval(intervalId);
 });
 
+
+
 const handleMenuClick = (val: number) => {
   console.info(val);
+  selectMenuID.value = val;
+  handleEndClick()
 };
 const handleStartClick = () => {
   store.start();
@@ -87,7 +101,7 @@ const handleEndClick = () => {
 
 <template>
   <header class="app-header">
-    <p class="app-header__title">可视化平台</p>
+    <p class="app-header__title">{{ selectMenuName }}</p>
     <div
       class="app-header__menu"
       v-for="menu of aMenuList"
@@ -98,10 +112,11 @@ const handleEndClick = () => {
       <span>{{ menu.name }}</span>
     </div>
     <el-select
-      v-model="depth"
+      :model-value="depth"
       placeholder="请选择数据深度"
       style="margin: 0 10px 0 0"
       :disabled="frameStatus !== 'stopped'"
+      @change="store.changeDepth"
     >
       <el-option
         v-for="depth of aDepthList"

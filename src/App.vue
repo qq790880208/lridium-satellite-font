@@ -1,20 +1,134 @@
 <script setup lang="ts">
 import CustomHeader from "@/views/custom-header.vue";
-// import LeftTemplate from "@/views/left-template.vue";
+import LeftTemplate from "@/views/left-template.vue";
 import MainTemplate from "@/views/main-template.vue";
 import RightTemplate from "@/views/right-template.vue";
+import IridiumSocket from "@/plugins/websocket/class-socket";
+import { getBarData, getLineData, getWebSocketAddress } from "@/api";
+import { useStore } from "@/store/modules";
+import { storeToRefs } from "pinia";
+import { onBeforeUnmount, shallowRef, watch } from "vue";
+// import { get } from "lodash";
+
+interface lineData {
+  AuthCount: number
+  Precision: number
+  errorRate: number
+}
+
+interface frame {
+  ID: number
+  Type: string
+  Body: string
+  Description: string
+  Step: number
+  extra?: string
+}
+
+const store = useStore();
+
+const { frameStatus, depth } = storeToRefs(store);
+
+let webSocketInstance: null | IridiumSocket = null;
+
+const barSingleData = shallowRef({} as barSingleData)
+const lineListData = shallowRef([] as Array<lineData>)
+
+getBar();
+getLine();
+
+watch(() => frameStatus.value, (value) => {
+  if (value === "pending") {
+    // webSocketInstance = new IridiumSocket
+    handleStatusChange("true", depth.value);
+  } else {
+    handleStatusChange("false", depth.value);
+  }
+});
+
+onBeforeUnmount(() => {
+  webSocketInstance?.dispose()
+})
+
+async function handleStatusChange(status: string, modelSize: number) {
+  try {
+    if (!status) {
+      webSocketInstance?.dispose();
+    }
+    const url = 'ws://x5d8sq.natappfree.cc/ws/iridium_group/'
+    // const url = 'ws://server.natappfree.cc:33696 '
+    webSocketInstance = new IridiumSocket(url, handleWebsocketMessage)
+    const response = await getWebSocketAddress({
+      Status: status,
+      modelSize
+    });
+    // if(get(response, 'Code', -1) === 1) {
+      // const url = get(response, 'Msg', '')
+    // }
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+async function getBar() {
+  try {
+    const response = await getBarData({});
+    // barSingleData.value = response
+    // console.info(response);
+  } catch (e) {
+    console.error(e);
+  }
+}
+async function getLine() {
+  try {
+    const response = await getLineData();
+    // lineData.value = response
+    // console.info(response);
+  } catch (e) {
+    console.error(e);
+  }
+}
+function handleWebsocketMessage(e: MessageEvent) {
+  try{
+    console.info(e)
+    const message = JSON.parse(e.data)
+    store.push(message.message)
+    // 如果是验证结果这一步，增加一个第5步，结束帧
+    if(message.message.Step === 4) {
+      store.push({
+        ID: -1,
+        Type: '',
+        Body: '',
+        Description: 'end',
+        Step: 5,
+        timeout: 9000
+      })
+    }
+  }catch (error) {
+    console.error(error)
+  }
+}
+function handleFrameStart(step: number) {
+  if(step === 1) {
+    getBar();
+    getLine();
+  }
+}
+
 </script>
 
 <template>
   <img alt="" src="@/assets/app-bg.png" class="img-bg" />
   <custom-header></custom-header>
   <main class="app-main">
-    <!--aside class="app-main__left">
+    <aside class="app-main__left">
       <left-template></left-template>
-    </aside-->
-    <main class="app-main__body"><main-template></main-template></main>
+    </aside>
+    <main class="app-main__body">
+      <main-template @frame-step="handleFrameStart"></main-template>
+    </main>
     <aside class="app-main__right">
-      <right-template></right-template>
+      <right-template :bar-single-data="barSingleData" :line-data="lineListData"></right-template>
     </aside>
   </main>
 </template>
@@ -27,24 +141,28 @@ import RightTemplate from "@/views/right-template.vue";
   top: 0;
   left: 0;
 }
+
 .app {
   &-main {
     background-size: 100% 100%;
     background-repeat: no-repeat;
     background-image: url("~@/assets/app-bg-wave.png"),
-      url("~@/assets/main-bg-line.png");
+    url("~@/assets/main-bg-line.png");
     display: flex;
     height: calc(100vh - 70px);
     // padding: 20px 29px;
     &__body {
       padding: 0 29px;
       flex: 1 0 50%;
+      max-width: 1420px;
     }
+
     &__left {
       background: url("~@/assets/main-bg-left.png") no-repeat;
       background-size: cover;
       // left: 0;
     }
+
     &__right {
       background: url("~@/assets/main-bg-right.png") no-repeat;
       background-size: cover;

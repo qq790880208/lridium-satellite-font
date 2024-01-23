@@ -3,25 +3,39 @@ import { defineStore } from "pinia";
 
 type frameStatus = "stopped" | "pending";
 
+interface frame {
+  ID: number
+  Type: string
+  Body: string
+  Description: string
+  Step: number
+  extra?: string
+  timeout?: number
+}
+
 export const useStore = defineStore("main", {
   state: () => {
     return {
+      depth: 1, // 深度
       frameStatus: "stopped", // 帧序列目前状态 stopped -- 停止 pending -- 进行
-      frameList: [], // 帧的list，先进先出
+      frameList: [] as Array<frame>, // 帧的list，先进先出
     };
   },
   actions: {
+    _changeFrameStatus(val: frameStatus) {
+      this.frameStatus = val;
+    },
     clear() {
       this.frameList = [];
     },
-    push() {
-      // if (this.frameStatus === "pending") {
-      //   this.frameList = this.frameList.concat(val);
-      // }
+    push(val: frame) {
+      this.frameList.push(val);
     },
     remove() {
-      const removedFrame = _get(this.frameList.slice(0, 1), "0", null);
-      this.frameList = this.frameList.slice(1);
+      const removedFrame = _get(this.frameList, "0", null);
+      if(this.frameList.length > 0) {
+        this.frameList = this.frameList.slice(1);
+      }
       return removedFrame;
     },
     start() {
@@ -30,8 +44,8 @@ export const useStore = defineStore("main", {
     stop() {
       this._changeFrameStatus("stopped");
     },
-    _changeFrameStatus(val: frameStatus) {
-      this.frameStatus = val;
+    changeDepth(val: number) {
+      this.depth = val;
     },
   },
 });

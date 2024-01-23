@@ -7,3 +7,11 @@ body {
     margin: 0;
     overflow: hidden;
 }
+
+.icon {
+    height: 1em;
+    width: 1em;
+    vertical-align: -0.15em;
+    /*fill: currentColor;*/
+    overflow: hidden;
+}

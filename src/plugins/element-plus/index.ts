@@ -1,9 +1,9 @@
 import { App, Component } from "vue";
-import { ElButton, ElInput, ElSelect, ElOption } from "element-plus";
+import { ElButton, ElInput, ElSelect, ElOption, ElProgress } from "element-plus";
 
 // Directives
 
-const components = [ElButton, ElInput, ElSelect, ElOption];
+const components = [ElButton, ElInput, ElSelect, ElOption, ElProgress];
 
 export function useElementPlus(app: App) {
   // 注册组件

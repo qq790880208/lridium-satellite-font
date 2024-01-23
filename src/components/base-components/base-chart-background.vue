@@ -67,6 +67,7 @@ const computedWidth = computed(() => {
     position: relative;
     height: calc(100% - 64px);
     flex-wrap: wrap;
+    z-index: 2;
   }
   &::before,
   &::after {

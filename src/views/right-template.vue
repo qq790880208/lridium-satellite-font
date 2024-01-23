@@ -1,24 +1,45 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { EChartsType } from "echarts";
+import { markRaw, ref, shallowRef, toRefs, watch } from "vue";
+import { getBarData, getLineData } from "@/api";
 import BaseChartBackground from "@/components/base-components/base-chart-background.vue";
 import BaseChartInstance from "@/components/base-components/base-chart-instance.vue";
-import { EChartsType } from "echarts";
+import EChartLine from "@/views/main-template/ehcart-line.vue";
+import EChartBar from "@/views/main-template/ehcart-bar.vue"
+
+interface rightChartProps {
+  lineData: Array<lineData>
+  barSingleData: barSingleData
+}
+
+interface lineData {
+  AuthCount: number
+  Precision: number
+  errorRate: number
+}
+
+const props = defineProps<rightChartProps>()
+
+const { lineData, barSingleData } = toRefs(props)
+
 
 const aComponentInfo = ref([
   {
     id: "1",
-    name: "BaseChartInstance",
+    component: markRaw(EChartLine),
+    name: 'line',
     height: "calc((100vh - 130px) / 2)",
-    title: "持续时间",
-    data: [],
+    title: "认证次数",
+    data: lineData.value,
     width: "410px",
   },
   {
     id: "2",
-    name: "BaseChartInstance",
+    component: markRaw(EChartBar),
+    name: 'bar',
     height: "calc((100vh - 130px) / 2)",
     title: "IRA帧个数",
-    data: [],
+    data: barSingleData.value,
     width: "410px",
   },
 ]);
@@ -34,6 +55,7 @@ const handleChartInit = (
     ...otherOptions,
   });
 };
+
 </script>
 
 <template>
@@ -44,7 +66,9 @@ const handleChartInit = (
       :width="component.width"
     >
       <component
-        :is="component.name"
+        :ref="component.name"
+        :is="component.component"
+        :data="component.data"
         @initCb="
           (chart) => {
             handleChartInit(chart, component.data as chartDataset);
