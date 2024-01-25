@@ -1,4 +1,4 @@
-import { get as _get } from "lodash";
+import { get as _get, forOwn as _forOwn } from "lodash";
 import { defineStore } from "pinia";
 
 type frameStatus = "stopped" | "pending";
@@ -19,7 +19,33 @@ export const useStore = defineStore("main", {
       depth: 1, // 深度
       frameStatus: "stopped", // 帧序列目前状态 stopped -- 停止 pending -- 进行
       frameList: [] as Array<frame>, // 帧的list，先进先出
+      oStepConsumesTime: {
+        '1': 1500,
+        '2': 3000,
+        '3': 1500,
+        '4': 1500,
+      } as Record<any, number>
     };
+  },
+  getters: {
+    allConsumesTime() {
+      let time = 0;
+      _forOwn(this.actuallyConsumesTime, (value) => {
+          time += value
+      })
+      return time
+    },
+    actuallyConsumesTime() {
+      const actuallyConsumesTime = {} as Record<string, number>;
+      _forOwn(this.oStepConsumesTime, (value, key) => {
+        if(key === '1' || key === '2') {
+          actuallyConsumesTime[key] = (value * this.depth) * parseInt(key, 10)
+        }else {
+          actuallyConsumesTime[key] = value
+        }
+      })
+      return actuallyConsumesTime
+    },
   },
   actions: {
     _changeFrameStatus(val: frameStatus) {
@@ -32,7 +58,7 @@ export const useStore = defineStore("main", {
       // 清理第一个5之后的步骤
       const index = this.frameList.findIndex(item => item.Step === 5);
 
-      this.frameList = index > -1 ? this.frameList.slice(0, index) : [];
+      this.frameList = index > -1 ? this.frameList.slice(0, index + 1) : [];
     },
     push(val: frame) {
       this.frameList.push(val);

@@ -40,7 +40,7 @@ watch(() => props.result, () => {
 
 // onMounted(() => {});
 
-function generateAnimationTimeLine() {
+function generateAnimationTimeLine(time: number) {
   const promiseAnimationTimeline = anime.timeline({
     easing: "easeOutExpo"
   });
@@ -49,13 +49,13 @@ function generateAnimationTimeLine() {
     delay: 1200,
     translateX: [500, 0],
     opacity: [0, 1],
-    duration: 3000
+    duration: time
   });
   return promiseAnimationTimeline
 }
 
-function startAnimation() {
-  const promiseAnimationTimeline = generateAnimationTimeLine();
+function startAnimation(time: number) {
+  const promiseAnimationTimeline = generateAnimationTimeLine(time);
   promiseAnimationTimeline.play();
   return promiseAnimationTimeline.finished;
 }

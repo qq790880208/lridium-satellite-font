@@ -1,7 +1,7 @@
 <script setup lang="ts">
 // import { Swiper } from "swiper";
 // import { Pagination } from "swiper/modules";
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue";
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, toRefs, watch } from "vue";
 import anime from "animejs/lib/anime.es.js";
 
 interface swiperProps {
@@ -15,6 +15,8 @@ const props = withDefaults(defineProps<swiperProps>(), {
   show: false
 });
 
+const { imageList, show } = toRefs(props)
+
 const emits = defineEmits(["animationFinish"]);
 
 defineExpose({
@@ -25,33 +27,32 @@ defineExpose({
 
 // const swiperDom = ref();
 
-
-const opacity = ref(0);
 const promiseAnimationList = ref([] as Array<Promise<boolean>>);
 // let promiseAnimationTimeline = anime.timeline({
 //   easing: "easeInOutExpo"
 // });
 const refImageDomList = ref([] as Array<HTMLImageElement>);
 const refTitledImage = ref();
+const tiledImageOpacity = ref(1);
 
 const computedTitledImageStyle = computed(() => {
-  const length = props.imageList.length;
+  const length = imageList.value.length;
   // const height = getHeight(length);
   const width = getWidth(length);
   return {
-    // height: `calc(100% / ${length})`,
     width
   };
 });
 
 watch(
-  () => props.imageList,
+  () => imageList.value,
   (value) => {
     if (value.length > 0) {
       // nextTick(() => {
       // });
     } else {
       promiseAnimationList.value = [];
+      tiledImageOpacity.value = 1;
       // promiseAnimationTimeline = anime.timeline({
       //   easing: "easeInOutExpo"
       // });
@@ -89,36 +90,38 @@ function generateAnimationPromise(dom: HTMLElement, index: number, duration?: nu
   });
 }
 
-function generateAnimationStep(dom: Element, index: number, duration?: number, opacity?: number) {
+function generateAnimationStep(dom: Element, index: number, duration?: number, opacity?: Array<number>) {
   return {
     targets: dom,
     translateX: (index * 10) - 20,
     translateY: (index * 10) - 20,
-    opacity: opacity,
+    opacity,
     duration
   };
 }
 
-function generateAnimationTimeLine() {
+function generateAnimationTimeLine(time: number) {
   const promiseAnimationTimeline = anime.timeline({
-    easing: "easeInOutExpo"
+    easing: "easeInOutExpo",
+    loop: false
   })
-  promiseAnimationTimeline.add(generateAnimationStep(refTitledImage.value as HTMLElement, 2, 3000, 0));
+  promiseAnimationTimeline.add(generateAnimationStep(refTitledImage.value as HTMLElement, 2, 3000, [1, 0]));
   const domList = document.querySelectorAll('.depth-img__image');
   if(domList.length === 1) {
     domList.forEach(item => {
-      promiseAnimationTimeline.add(generateAnimationStep(item, 2, 1000, 1));
+      promiseAnimationTimeline.add(generateAnimationStep(item, 2, time, [0, 1]));
     });
   }else {
     domList.forEach((item, index) => {
-      promiseAnimationTimeline.add(generateAnimationStep(item, index, 1000, 1));
+      promiseAnimationTimeline.add(generateAnimationStep(item, index, time, [0, 1]));
     });
   }
   return promiseAnimationTimeline
 }
 
-function startAnimation() {
-  const promiseAnimationTimeline = generateAnimationTimeLine()
+function startAnimation(time: number) {
+  // tiledImageOpacity.value = 0;
+  const promiseAnimationTimeline = generateAnimationTimeLine(time)
   // return Promise.allSettled(promiseAnimationList)
   promiseAnimationTimeline.play();
   return promiseAnimationTimeline.finished;
@@ -147,10 +150,13 @@ function getWidth(length: number) {
     case 1:
       width = "100%";
       break;
+    case 2:
     case 3:
       width = `calc((100% - 30px) / 2)`;
       break;
+    case 4:
     case 5:
+    case 6:
     case 7:
     default:
       width = `calc((100% - 30px) / 3)`;
@@ -165,11 +171,12 @@ function getWidth(length: number) {
   <!--    <div class="swiper-wrapper">-->
   <div style="height: 100%;width: 100%">
     <div class="tiled-img" ref="refTitledImage" :style="{
-      flexWrap: props.imageList.length === 3 ? 'wrap-reverse' : 'warp',
-      justifyContent: props.imageList.length === 7 ? 'start' : 'warp'
+      opacity: tiledImageOpacity,
+      flexWrap: imageList.length === 3 ? 'wrap-reverse' : 'warp',
+      justifyContent: imageList.length === 7 ? 'start' : 'warp'
     }">
       <img
-        v-for="(image, index) of props.imageList"
+        v-for="(image, index) of imageList"
         :style="computedTitledImageStyle"
         :key="index"
         alt=""
@@ -179,7 +186,7 @@ function getWidth(length: number) {
     <div class="depth-img">
       <img
         class="depth-img__image"
-        v-for="(image, index) of props.imageList"
+        v-for="(image, index) of imageList"
         :key="index"
         alt=""
         :src="image"
@@ -201,11 +208,12 @@ function getWidth(length: number) {
   justify-content: center;
   height: 100%;
   width: 100%;
-  opacity: 1;
   padding: 10px 10px 0 0;
+  opacity: 1;
 
   & > img {
     margin: 0 0 10px 10px;
+    object-fit: contain;
     // height: 100%;
     // position: absolute;
     // width: 100%;
@@ -217,10 +225,10 @@ function getWidth(length: number) {
   width: 100%;
 
   & > img {
-    // opacity: 0;
     height: 100%;
     position: absolute;
     width: 100%;
+    opacity: 0;
   }
 }
 </style>

@@ -1,19 +1,19 @@
 <script setup lang="ts">
 import { storeToRefs } from "pinia";
-import { defineEmits, nextTick, onBeforeUnmount, reactive, Ref, ref, shallowRef, watch } from "vue";
+import { defineEmits, nextTick, onBeforeUnmount, reactive, ref, watch } from "vue";
 import { useStore } from "@/store/modules";
 import BaseChartBackground from "@/components/base-components/base-chart-background.vue";
 import Echart from "@/views/main-template/ehcart-three.vue";
 import SwiperDepth from "@/views/main-template/swiper-depth.vue";
 import WebTerminal from "@/views/main-template/web-terminal.vue";
 import VerifyResult from "@/views/main-template/verify-result.vue";
-import { ceil, debounce } from "lodash";
+import { ceil } from "lodash";
 
 const emits = defineEmits(["frameStep"]);
 
 const store = useStore();
 
-const result = ref('');
+const result = ref("");
 
 const state = storeToRefs(store);
 
@@ -26,6 +26,10 @@ const refDepthImage = ref();
 const refVerifyResult = ref();
 
 const depth = state.depth;
+
+const oStepConsumesTime = state.oStepConsumesTime;
+
+const nCurrentAnimationTime = ref(0);
 
 // const frameList = state.frameList
 
@@ -86,8 +90,8 @@ const depthImageList = ref([] as Array<string>);
 // });
 
 onBeforeUnmount(() => {
-  stop()
-})
+  stop();
+});
 
 watch(state.frameStatus, (value) => {
   if (value === "stopped") {
@@ -131,9 +135,15 @@ const playStep = (step: number, timeout: number) => {
       case 2:
         oShowList.depth = true;
         nextTick(() => {
-          refDepthImage.value.startAnimation().then(() => {
-            resolve(true);
-          });
+          if (depth.value === depthImageList.value.length) {
+            refDepthImage.value.startAnimation(timeout).then(() => {
+              resolve(true);
+            });
+          } else {
+            stopTimeoutId = setTimeout(() => {
+              resolve(true);
+            }, timeout);
+          }
         });
         break;
       case 3:
@@ -145,7 +155,7 @@ const playStep = (step: number, timeout: number) => {
       case 4:
         oShowList.result = true;
         nextTick(() => {
-          refVerifyResult.value.startAnimation().then(() => {
+          refVerifyResult.value.startAnimation(timeout).then(() => {
             resolve(true);
           });
         });
@@ -154,7 +164,7 @@ const playStep = (step: number, timeout: number) => {
         stopTimeoutId = setTimeout(() => {
           clearDisplayStatus();
           resolve(true);
-        }, timeout);
+        }, 9000);
         break;
     }
   });
@@ -164,7 +174,7 @@ const clearDisplayStatus = () => {
   oShowList.depth = false;
   oShowList.chart = false;
   oShowList.result = false;
-  result.value = '';
+  result.value = "";
   depthImageList.value = [];
   eChart3Data.value = [];
 };
@@ -174,17 +184,18 @@ function animation() {
     clearTimeout(stopTimeoutId);
     const currentFrame = store.remove();
     // 如果点击了停止按钮且播放完了当前片段
-    if(state.frameStatus.value === "stopped" && currentFrame?.Step === 5) {
-      console.info(animation)
-      emits("frameStep", 5, 3000, result.value);
+    if (state.frameStatus.value === "stopped" && currentFrame?.Step === 5) {
+      emits("frameStep", 5, oStepConsumesTime.value[currentFrame.Step], result.value);
       return;
     }
     if (currentFrame) {
       const text = `${currentFrame.Description}: ${currentFrame.Body}`;
       handleDosText(text);
       setStepData(currentFrame.Step, currentFrame);
-      emits("frameStep", currentFrame.Step, currentFrame.timeout || 3000, result.value);
-      playStep(currentFrame.Step, currentFrame.timeout || 3000).finally(animation);
+      const animationTime = oStepConsumesTime.value[currentFrame.Step];
+      // nCurrentAnimationTime.value = animationTime * currentFrame.Step;
+      emits("frameStep", currentFrame.Step, animationTime, result.value);
+      playStep(currentFrame.Step, animationTime).finally(animation);
     } else {
       stopTimeoutId = setTimeout(animation, 3000);
     }
@@ -210,7 +221,7 @@ function handleDosText(text: string) {
     //     setDosText(text.substring(i * maxLength, i * maxLength + maxLength));
     //   }, i * 100);
     // }
-    setDosText(text.substring(0, maxLength))
+    setDosText(text.substring(0, maxLength));
   } else {
     setDosText(text);
   }
@@ -222,14 +233,14 @@ function setStepData(step: number, data: any) {
     case 1:
       break;
     case 2:
-      // `${process.env.VUE_APP_HTTP_API}/${data.image_dict}`
+      // `${process.env.VUE_APP_HTTP_API}/${data.image_dict}` TODO
       depthImageList.value = depthImageList.value.concat([`${data.image_dict}`]);
       break;
     case 3:
       eChart3Data.value = data.value;
       break;
     case 4:
-      result.value = data.Body === 0 ? 'exception' : 'success';
+      result.value = data.Body === 0 ? "exception" : "success";
       break;
     default:
       order.value += 1;

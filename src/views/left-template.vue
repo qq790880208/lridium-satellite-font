@@ -5,18 +5,23 @@ import type { AnimationItem } from "lottie-web";
 import animationData from "./animations/data.json";
 import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 import type { Ref } from "vue";
+import { storeToRefs } from "pinia";
+import { useStore } from "@/store/modules";
 
 defineExpose({
   startAnimation
 })
 
 const refDiv = ref();
-const percentage = ref();
+const percentage = ref(0);
 const status = ref('');
-const timeOut = ref(0);
+const store = useStore();
+const state = storeToRefs(store);
+const oStepConsumesTime = state.allConsumesTime;
+// const timeOut = ref(0);
 let lottieInstance: AnimationItem;
+let intervalId = -1;
 
-const progressDuration = computed(() => Math.floor(percentage.value / timeOut.value))
 
 onMounted(() => {
   lottieInstance = lottie.loadAnimation({
@@ -26,32 +31,43 @@ onMounted(() => {
     autoplay: false,
     animationData: animationData
   });
-  // setInterval(() => {
-  //   lottieInstance.playSegments([0, 25], true)
-  // }, 3000)
-  // setInterval(() => {
-  //   lottieInstance.playSegments([25, 37.5], true)
-  // }, 3000)
 });
 
 onBeforeUnmount(() => {
-  lottieInstance.destroy()
+  lottieInstance.destroy();
+  clearInterval(intervalId);
 })
 
 function startAnimation(step: number, timeout: number, result = '') {
-  console.info(step);
-  console.info(timeout);
   modifyProcessStatus(step, timeout, result);
   modifyLottieStatus(step);
 }
 
 function modifyProcessStatus(step: number, timeout: number, result: string) {
-  percentage.value = step < 5 ? step * 25 : 100;
+  clearInterval(intervalId);
   status.value = result;
-  timeOut.value = timeout;
+  if(step === 5) {
+    percentage.value = 0;
+    status.value = '';
+  } else {
+    intervalId = setInterval(() => {
+      if(percentage.value < 100) {
+        percentage.value ++
+      }
+    }, Math.floor((oStepConsumesTime.value) / 100));
+  }
+  // const percentageValue = step < 5 ? step * 25 : 100;
+  // status.value = result;
+  // intervalId = setInterval(() => {
+  //   if(percentage.value < percentageValue) {
+  //     percentage.value ++
+  //   }
+  // }, Math.floor(timeout / percentageValue));
+  // timeOut.value = timeout;
 }
 
 function modifyLottieStatus(step: number) {
+  // lottieInstance.stop();
   switch (step) {
     case 1:
       lottieInstance.playSegments([0, 25], true);
@@ -64,12 +80,10 @@ function modifyLottieStatus(step: number) {
       lottieInstance.playSegments([37.5, 50], true);
       break;
     default:
-      lottieInstance.stop();
+      lottieInstance.playSegments([0, 0.001], true);
       break;
   }
 }
-
-
 </script>
 
 <template>
@@ -87,7 +101,6 @@ function modifyLottieStatus(step: number) {
         :status="status"
         striped
         striped-flow
-        :duration="progressDuration"
       />
     </div>
 

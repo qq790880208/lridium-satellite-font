@@ -23,7 +23,6 @@ watch(
   () => props.data,
   (val) => {
     // console.info(TerminalApi)
-    console.info(terminalInstance.value)
     // terminalInstance.value.pushMessage({
     //   type: 'normal',
     //   class: 'info',
@@ -49,6 +48,7 @@ watch(
     :init-log="[
       { type: 'normal', class: 'info', content: '系统正在初始化，请稍候...' },
     ]"
+    :log-size-limit="50"
     :show-header="false"
     @initComplete="handleTerminal"
   ></terminal>

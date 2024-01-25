@@ -16,7 +16,7 @@
     "dayjs": "^1.11.9",
     "echarts": "^5.4.2",
     "echarts-gl": "^2.0.9",
-    "element-plus": "^2.3.8",
+    "element-plus": "^2.5.3",
     "lodash": "^4.17.21",
     "lottie-web": "^5.12.2",
     "pinia": "^2.1.4",

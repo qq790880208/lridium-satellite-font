@@ -152,7 +152,7 @@ const handleEndClick = () => {
 <style lang="less">
 .app {
   &-header {
-    align-items: baseline;
+    align-items: center;
     background: url("~@/assets/header-bg.png") no-repeat;
     background-size: 100% 90%;
     display: flex;
@@ -210,11 +210,12 @@ const handleEndClick = () => {
 
     .el-select {
       position: relative;
-      top: 3px;
+      width: 200px;
+      top: 10px;
     }
     .el-button {
       position: relative;
-      top: 5px;
+      top: 10px;
     }
   }
 }

@@ -63,7 +63,8 @@ async function handleStatusChange(status: string, modelSize: number) {
       return;
     }else {
       getWebsocketAddress(status).finally(() => {
-        webSocketInstance = new IridiumSocket(url, handleWebsocketMessage);
+        // TODO
+        webSocketInstance = new IridiumSocket(url, handleWebsocketMessage, depth.value);
       })
     }
   } catch (e) {
