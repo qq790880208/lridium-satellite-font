@@ -32,7 +32,6 @@ export default class ParkProfile {
 
   handleClickEvent(type: string, id: string) {
     if (type === this.type) {
-      console.info(`点击设备id：${id}`);
     }
   }
 

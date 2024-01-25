@@ -7,76 +7,41 @@ import BaseChartInstance from "@/components/base-components/base-chart-instance.
 import EChartLine from "@/views/main-template/ehcart-line.vue";
 import EChartBar from "@/views/main-template/ehcart-bar.vue"
 
-interface rightChartProps {
-  lineData: Array<lineData>
-  barSingleData: barSingleData
-}
-
 interface lineData {
   AuthCount: number
   Precision: number
   errorRate: number
 }
 
+interface rightChartProps {
+  lineListData: Array<lineData>
+  barSingleData: Array<Array<number>>
+}
+
+
 const props = defineProps<rightChartProps>()
 
-const { lineData, barSingleData } = toRefs(props)
+const { lineListData, barSingleData } = toRefs(props)
 
 
-const aComponentInfo = ref([
-  {
-    id: "1",
-    component: markRaw(EChartLine),
-    name: 'line',
-    height: "calc((100vh - 130px) / 2)",
-    title: "认证次数",
-    data: lineData.value,
-    width: "410px",
-  },
-  {
-    id: "2",
-    component: markRaw(EChartBar),
-    name: 'bar',
-    height: "calc((100vh - 130px) / 2)",
-    title: "IRA帧个数",
-    data: barSingleData.value,
-    width: "410px",
-  },
-]);
-
-const handleChartInit = (
-  chart: EChartsType,
-  data: chartDataset,
-  otherOptions?: Record<string, any>
-) => {
-  chart.setOption({
-    dataset: data,
-    series: [{ type: "" }],
-    ...otherOptions,
-  });
-};
 
 </script>
 
 <template>
-  <template v-for="component of aComponentInfo" :key="component.id">
-    <base-chart-background
-      :height="component.height"
-      :title="component.title"
-      :width="component.width"
-    >
-      <component
-        :ref="component.name"
-        :is="component.component"
-        :data="component.data"
-        @initCb="
-          (chart) => {
-            handleChartInit(chart, component.data as chartDataset);
-          }
-        "
-      />
-    </base-chart-background>
-  </template>
+  <base-chart-background
+    height="calc((100vh - 130px) / 2)"
+    title="认证次数"
+    width="410px"
+  >
+    <e-chart-line :data="lineListData"></e-chart-line>
+  </base-chart-background>
+  <base-chart-background
+    height="calc((100vh - 130px) / 2)"
+    title="IRA帧个数"
+    width="410px"
+  >
+    <e-chart-bar :data="barSingleData"></e-chart-bar>
+  </base-chart-background>
 </template>
 
 <style lang="less"></style>

@@ -19,17 +19,16 @@ const { dataSet } = toRefs(props)
 
 watch(() => dataSet.value, (val) => {
   if(chart) {
-    chart.setOption({
-      dataset: {
-        dimensions: ["Q", "I", "Time"],
-        source: val,
-      },
-    })
+    // chart.setOption({
+    //   dataset: {
+    //     dimensions: ["Q", "I", "Time"],
+    //     source: val,
+    //   },
+    // })
   }
 })
 
 const handleChartInit = (val: EChartsType) => {
-  console.info("handleChartInit");
   chart = val;
   chart.setOption({
     dataset: {

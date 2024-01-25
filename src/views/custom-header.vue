@@ -52,11 +52,11 @@ const aDepthList = ref([
     label: 3,
     value: 3,
   },
-  // {
-  //   id: 2,
-  //   label: 4,
-  //   value: 4,
-  // },
+  {
+    id: 2,
+    label: 4,
+    value: 4,
+  },
   {
     id: 4,
     label: 5,
@@ -86,7 +86,6 @@ onBeforeUnmount(() => {
 
 
 const handleMenuClick = (val: number) => {
-  console.info(val);
   selectMenuID.value = val;
   handleEndClick()
 };

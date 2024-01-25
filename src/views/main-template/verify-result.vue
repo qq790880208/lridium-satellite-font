@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import anime from "animejs/lib/anime.es.js";
-import { onMounted, ref, watch } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 
 interface verifyResultProps {
-  result: boolean;
+  result: string;
 }
 
 defineExpose({
@@ -13,8 +13,12 @@ defineExpose({
 const refAnimateFinger = ref();
 
 const props = withDefaults(defineProps<verifyResultProps>(), {
-  result: false
+  result: ''
 });
+
+const computedFillColor = computed(() => {
+  return props.result === 'success' ? 'green' : 'red'
+})
 
 // let promiseAnimationTimeline = anime.timeline({
 //   easing: "easeOutExpo"
@@ -31,6 +35,7 @@ watch(() => props.result, () => {
   //   opacity: [0, 1],
   //   duration: 3000
   // });
+
 })
 
 // onMounted(() => {});
@@ -51,8 +56,6 @@ function generateAnimationTimeLine() {
 
 function startAnimation() {
   const promiseAnimationTimeline = generateAnimationTimeLine();
-  console.info('1')
-  // return Promise.allSettled(promiseAnimationList)
   promiseAnimationTimeline.play();
   return promiseAnimationTimeline.finished;
 }
@@ -69,7 +72,7 @@ function startAnimation() {
       ref="refAnimateFinger"
       class="icon verify-result active"
       aria-hidden="true"
-      :fill="props.result ? 'green' : 'red'"
+      :fill="computedFillColor"
     >
       <use xlink:href="#icon-finger6"></use>
     </svg>

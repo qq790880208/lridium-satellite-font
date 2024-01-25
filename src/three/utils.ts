@@ -106,7 +106,6 @@ export const loadTexture = (url: string, name: string, onProcess: () => void) =>
   return new Promise((resolve, reject) => {
     new RGBELoader().setPath(url).load(name, (texture) => {
       texture.mapping = EquirectangularReflectionMapping;
-      // console.info(texture);
       resolve(texture);
     }, onProcess, (error) => {
       console.error(error);

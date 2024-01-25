@@ -6,7 +6,7 @@ type frameStatus = "stopped" | "pending";
 interface frame {
   ID: number
   Type: string
-  Body: string
+  Body: any
   Description: string
   Step: number
   extra?: string
@@ -25,8 +25,14 @@ export const useStore = defineStore("main", {
     _changeFrameStatus(val: frameStatus) {
       this.frameStatus = val;
     },
-    clear() {
+    clearFrameList() {
       this.frameList = [];
+    },
+    stopFrameList() {
+      // 清理第一个5之后的步骤
+      const index = this.frameList.findIndex(item => item.Step === 5);
+
+      this.frameList = index > -1 ? this.frameList.slice(0, index) : [];
     },
     push(val: frame) {
       this.frameList.push(val);
@@ -39,9 +45,11 @@ export const useStore = defineStore("main", {
       return removedFrame;
     },
     start() {
+      this.clearFrameList();
       this._changeFrameStatus("pending");
     },
     stop() {
+      this.stopFrameList();
       this._changeFrameStatus("stopped");
     },
     changeDepth(val: number) {

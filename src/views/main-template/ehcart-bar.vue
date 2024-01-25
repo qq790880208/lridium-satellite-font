@@ -15,7 +15,7 @@ interface resultData {
 }
 
 interface barChartProps {
-  data: data
+  data: Array<Array<number>>
 }
 
 const props = defineProps<barChartProps>()
@@ -28,7 +28,7 @@ let chart: EChartsType;
 
 const ids = [2, 3, 4, 5, 6, 7, 8, 9, 13, 16, 17, 18, 22, 23, 24, 25, 26, 28, 29, 30, 33, 36, 38, 39, 40, 42, 43, 44, 46, 48, 49, 50, 51, 57, 65, 67, 68, 69, 71, 72, 73, 74, 77, 78, 79, 81, 82, 85, 87, 88, 89, 90, 92, 93, 94, 96, 99, 103, 104, 107, 109, 110, 111, 112, 114, 115]
 
-const satelliteList: Array<resultData> = ids.map(item => {
+let satelliteList: Array<resultData> = ids.map((item, index) => {
   return {
     id: item.toString(),
     resultSuccess: 0,
@@ -36,40 +36,50 @@ const satelliteList: Array<resultData> = ids.map(item => {
   }
 })
 
-watch(() => data.value, (val) => {
-  modifyResult(val.id, val.result)
+
+
+watch(() => data.value, (value) => {
+  modifyResult()
+}, {
+  immediate: true,
+  deep: true
 })
 
 // const resultSuccessList: Array<number> = new Array(66).fill(0)
 // const resultFailureList: Array<number> = new Array(66).fill(0)
 
-function modifyResult(id: string, result: boolean) {
-  const modifiedSatelliteList = satelliteList.map(item => {
+function getModifiedSatelliteList() {
+  return satelliteList.map((item, index) => {
     return Object.assign({}, item, {
-      resultSuccess: result ? ++item.resultSuccess : item.resultSuccess,
-      resultFailure: !result ? ++item.resultFailure : item.resultFailure
+      resultSuccess: data.value?.[index]?.[0] || 0,
+      resultFailure: data.value?.[index]?.[1] || 0
     })
   })
+}
+
+function modifyResult() {
+  satelliteList = getModifiedSatelliteList();
   if(chart) {
     chart.setOption({
       series: [{
-        name: 'Direct',
+        name: '成功次数',
         type: 'bar',
         // emphasis: {
         //   focus: 'series'
         // },
-        data: modifiedSatelliteList.map(item => item.resultSuccess)
+        data: satelliteList.map(item => item.resultSuccess)
       }, {
-        name: 'Direct',
+        name: '失败次数',
         type: 'bar',
         // emphasis: {
         //   focus: 'series'
         // },
-        data: modifiedSatelliteList.map(item => item.resultFailure)
+        data: satelliteList.map(item => item.resultFailure)
       }]
     })
   }
 }
+
 
 const handleChartInit = (val: EChartsType) => {
   chart = val;
@@ -91,7 +101,7 @@ const handleChartInit = (val: EChartsType) => {
     yAxis: [
       {
         type: 'value',
-        name: "数量（个）",
+        name: "数量（次）",
         nameGap: 25,
         nameLocation: "middle",
         axisLabel: { textStyle: { color: '#FFFFFF' } },

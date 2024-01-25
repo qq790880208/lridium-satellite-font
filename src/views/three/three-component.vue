@@ -73,7 +73,7 @@ async function initAllModelAndAddScene() {
 }
 
 function handleModelLoader() {
-  console.info();
+  // console.info();
 }
 
 </script>

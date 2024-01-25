@@ -65,9 +65,8 @@ watch(() => dataSet.value, () => {
     }),
     ...otherProps.value
   })
-  // console.info(option)
   myChart?.setOption(option, { lazyUpdate: true })
-}, { immediate: true })
+})
 
 </script>
 

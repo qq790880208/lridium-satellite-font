@@ -47,21 +47,9 @@ const computedTitledImageStyle = computed(() => {
 watch(
   () => props.imageList,
   (value) => {
-    console.info(value)
     if (value.length > 0) {
-      nextTick(() => {
-        // promiseAnimationList.value = refImageDomList.value.map((item, index) => {
-        //   // 希望在3s内完成所有动画
-        //   return generateAnimationPromise(item, index, 3000);
-        // })
-        // promiseAnimationTimeline = anime.timeline({
-        //   easing: "easeInOutExpo"
-        // })
-        // promiseAnimationTimeline.add(generateAnimationStep(refTitledImage.value as HTMLElement, 2, 3000, 0));
-        // refImageDomList.value.forEach((item, index) => {
-        //   promiseAnimationTimeline.add(generateAnimationStep(item, index, 1000, 1));
-        // });
-      });
+      // nextTick(() => {
+      // });
     } else {
       promiseAnimationList.value = [];
       // promiseAnimationTimeline = anime.timeline({
@@ -71,30 +59,20 @@ watch(
   }
 );
 
-watch(
-  () => props.show,
-  (value) => {
-    if (!value) {
-      refImageDomList.value = [];
-      opacity.value = 0;
-    }
-  }
-);
+// onMounted(() => {
+//
+//   // swiper = new Swiper(swiperDom.value, {
+//   //   autoplay: true,
+//   //   modules: [Pagination],
+//   //   pagination: {
+//   //     el: swiperPaginationDom.value
+//   //   }
+//   // });
+// });
 
-onMounted(() => {
-
-  // swiper = new Swiper(swiperDom.value, {
-  //   autoplay: true,
-  //   modules: [Pagination],
-  //   pagination: {
-  //     el: swiperPaginationDom.value
-  //   }
-  // });
-});
-
-onBeforeUnmount(() => {
-  // swiper.destroy();
-});
+// onBeforeUnmount(() => {
+//   // swiper.destroy();
+// });
 
 function generateAnimationPromise(dom: HTMLElement, index: number, duration?: number): Promise<boolean> {
   return new Promise((resolve) => {
@@ -111,7 +89,7 @@ function generateAnimationPromise(dom: HTMLElement, index: number, duration?: nu
   });
 }
 
-function generateAnimationStep(dom: HTMLElement, index: number, duration?: number, opacity?: number) {
+function generateAnimationStep(dom: Element, index: number, duration?: number, opacity?: number) {
   return {
     targets: dom,
     translateX: (index * 10) - 20,
@@ -126,9 +104,16 @@ function generateAnimationTimeLine() {
     easing: "easeInOutExpo"
   })
   promiseAnimationTimeline.add(generateAnimationStep(refTitledImage.value as HTMLElement, 2, 3000, 0));
-  refImageDomList.value.forEach((item, index) => {
-    promiseAnimationTimeline.add(generateAnimationStep(item, index, 1000, 1));
-  });
+  const domList = document.querySelectorAll('.depth-img__image');
+  if(domList.length === 1) {
+    domList.forEach(item => {
+      promiseAnimationTimeline.add(generateAnimationStep(item, 2, 1000, 1));
+    });
+  }else {
+    domList.forEach((item, index) => {
+      promiseAnimationTimeline.add(generateAnimationStep(item, index, 1000, 1));
+    });
+  }
   return promiseAnimationTimeline
 }
 
@@ -139,9 +124,9 @@ function startAnimation() {
   return promiseAnimationTimeline.finished;
 }
 
-function setRefImageDomList(el: HTMLImageElement) {
-  refImageDomList.value.push(el);
-}
+// function setRefImageDomList(el: HTMLImageElement) {
+//   refImageDomList.value.push(el);
+// }
 
 function getHeight(length: number) {
   let height = "100%";
@@ -193,10 +178,9 @@ function getWidth(length: number) {
     </div>
     <div class="depth-img">
       <img
+        class="depth-img__image"
         v-for="(image, index) of props.imageList"
         :key="index"
-        :ref="setRefImageDomList"
-        :style="{ opacity }"
         alt=""
         :src="image"
       />
@@ -233,7 +217,7 @@ function getWidth(length: number) {
   width: 100%;
 
   & > img {
-    opacity: 0;
+    // opacity: 0;
     height: 100%;
     position: absolute;
     width: 100%;

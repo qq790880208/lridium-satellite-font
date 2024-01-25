@@ -1,20 +1,19 @@
 <script setup lang="ts">
-import { EChartsType } from "echarts";
 import { storeToRefs } from "pinia";
-import { defineEmits, nextTick, onMounted, reactive, ref, shallowRef, watch } from "vue";
+import { defineEmits, nextTick, onBeforeUnmount, reactive, Ref, ref, shallowRef, watch } from "vue";
 import { useStore } from "@/store/modules";
 import BaseChartBackground from "@/components/base-components/base-chart-background.vue";
 import Echart from "@/views/main-template/ehcart-three.vue";
 import SwiperDepth from "@/views/main-template/swiper-depth.vue";
 import WebTerminal from "@/views/main-template/web-terminal.vue";
 import VerifyResult from "@/views/main-template/verify-result.vue";
-import { randomNumber } from "@/utils";
+import { ceil, debounce } from "lodash";
 
 const emits = defineEmits(["frameStep"]);
 
 const store = useStore();
 
-const result = ref();
+const result = ref('');
 
 const state = storeToRefs(store);
 
@@ -53,7 +52,7 @@ const aComponentInfo = ref([
   }
 ]);
 
-const eChart3Data = shallowRef([] as number[][]);
+const eChart3Data = ref([] as number[][]);
 
 // computed(() => {
 //   return currentFrameList;
@@ -61,7 +60,7 @@ const eChart3Data = shallowRef([] as number[][]);
 
 // watch(() => depth, () => {})
 
-const depthImageList = shallowRef([""]);
+const depthImageList = ref([] as Array<string>);
 
 
 // 该生命周期基本用于测试使用 TODO
@@ -77,18 +76,18 @@ const depthImageList = shallowRef([""]);
 //     nextTick(() => {
 //       // console.info(refDepthImage.value.startAnimation())
 //       refDepthImage.value.startAnimation().then(() => {
-//         console.info('22222222222222222')
 //         oShowList.depth = false;
 //       });
 //       refVerifyResult.value.startAnimation().then(() => {
-//         console.info('1111111111111111111')
 //         oShowList.result = false;
 //       });
 //     });
 //   }, 1000);
 // });
 
-// watch(state.frameList, () => {});
+onBeforeUnmount(() => {
+  stop()
+})
 
 watch(state.frameStatus, (value) => {
   if (value === "stopped") {
@@ -104,10 +103,10 @@ const play = () => {
   oShowList.depth = false;
   oShowList.chart = false;
   oShowList.result = false;
-  console.info("play");
   // currentFrameList.value = store.remove();
   oShowList.img = false;
   oShowList.dos = true;
+  clearDisplayStatus();
   dosText.value = `开始, 第${order.value}帧`;
   animation();
   // TODO 临时展示
@@ -115,62 +114,105 @@ const play = () => {
 };
 
 const stop = () => {
-  console.info("stop");
   order.value = 1;
   dosText.value = "结束";
-  clearInterval(interval1);
-  clearTimeout(stopTimeoutId);
-  // clearInterval(interval2);
-  // clearInterval(interval3);
-  // clearInterval(interval4);
+  // clearDisplayStatus();
+  // clearTimeout(stopTimeoutId);
 };
 
 const playStep = (step: number, timeout: number) => {
   return new Promise((resolve) => {
     switch (step) {
       case 1:
-        resolve(true);
+        stopTimeoutId = setTimeout(() => {
+          resolve(true);
+        }, timeout);
         break;
       case 2:
         oShowList.depth = true;
-        refDepthImage.value.startAnimation().then(() => {
-          resolve(true);
+        nextTick(() => {
+          refDepthImage.value.startAnimation().then(() => {
+            resolve(true);
+          });
         });
         break;
       case 3:
         oShowList.chart = true;
-        resolve(true);
+        stopTimeoutId = setTimeout(() => {
+          resolve(true);
+        }, timeout);
         break;
       case 4:
-        refVerifyResult.value.startAnimation().then(() => {
-          resolve(true);
+        oShowList.result = true;
+        nextTick(() => {
+          refVerifyResult.value.startAnimation().then(() => {
+            resolve(true);
+          });
         });
         break;
       default:
         stopTimeoutId = setTimeout(() => {
-          clearDisplayStatus()
+          clearDisplayStatus();
           resolve(true);
         }, timeout);
         break;
     }
-  })
+  });
 };
 
 const clearDisplayStatus = () => {
   oShowList.depth = false;
   oShowList.chart = false;
   oShowList.result = false;
+  result.value = '';
+  depthImageList.value = [];
+  eChart3Data.value = [];
 };
 
 function animation() {
-  const currentFrame = store.remove();
-  if (currentFrame) {
-    dosText.value = `${currentFrame.Description}: ${currentFrame.Body}`;
-    emits("frameStep", currentFrame);
-    setStepData(currentFrame.Step, currentFrame);
-    playStep(currentFrame.Step, currentFrame.timeout || 3000).finally(animation);
+  try {
+    clearTimeout(stopTimeoutId);
+    const currentFrame = store.remove();
+    // 如果点击了停止按钮且播放完了当前片段
+    if(state.frameStatus.value === "stopped" && currentFrame?.Step === 5) {
+      console.info(animation)
+      emits("frameStep", 5, 3000, result.value);
+      return;
+    }
+    if (currentFrame) {
+      const text = `${currentFrame.Description}: ${currentFrame.Body}`;
+      handleDosText(text);
+      setStepData(currentFrame.Step, currentFrame);
+      emits("frameStep", currentFrame.Step, currentFrame.timeout || 3000, result.value);
+      playStep(currentFrame.Step, currentFrame.timeout || 3000).finally(animation);
+    } else {
+      stopTimeoutId = setTimeout(animation, 3000);
+    }
+  } catch (e) {
+    console.error(e);
+    clearTimeout(stopTimeoutId);
+  }
+}
+
+// const throttleSetDosText = debounce(setDosText, 2000);
+
+function setDosText(text: string) {
+  dosText.value = text;
+}
+
+function handleDosText(text: string) {
+  let maxLength = 1000;
+  // dos显示内容超过1000个字符，添加防抖，每5000字符加一次
+  if (text.length > maxLength) {
+    const number = ceil(text.length / maxLength);
+    // for (let i = 0; i < number; i++) {
+    //   setTimeout(() => {
+    //     setDosText(text.substring(i * maxLength, i * maxLength + maxLength));
+    //   }, i * 100);
+    // }
+    setDosText(text.substring(0, maxLength))
   } else {
-    stopTimeoutId = setTimeout(animation, 3000);
+    setDosText(text);
   }
 }
 
@@ -180,13 +222,14 @@ function setStepData(step: number, data: any) {
     case 1:
       break;
     case 2:
-      depthImageList.value = data.image;
+      // `${process.env.VUE_APP_HTTP_API}/${data.image_dict}`
+      depthImageList.value = depthImageList.value.concat([`${data.image_dict}`]);
       break;
     case 3:
       eChart3Data.value = data.value;
       break;
     case 4:
-      result.value = data.Body !== 0;
+      result.value = data.Body === 0 ? 'exception' : 'success';
       break;
     default:
       order.value += 1;
@@ -235,8 +278,8 @@ function setStepData(step: number, data: any) {
       ></verify-result>
     </div>
     <transition name="el-fade-in">
-      <div class="main-template__block" v-show="oShowList.chart">
-        <echart :data-set="eChart3Data"></echart>
+      <div class="main-template__block">
+        <echart v-show="oShowList.chart" :data-set="eChart3Data"></echart>
       </div>
     </transition>
   </base-chart-background>

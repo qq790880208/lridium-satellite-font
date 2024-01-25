@@ -25,7 +25,6 @@ service.interceptors.request.use(
 service.interceptors.response.use(
   // token解析失败，跳转到登录页
   (response) => {
-    // console.info(response);
     return get(response, "data", null)
   },
   (error) => {

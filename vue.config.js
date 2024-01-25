@@ -18,7 +18,7 @@ module.exports = defineConfig({
     proxy: {
       [process.env.VUE_APP_BASE_API]: {
         // target: 'http://'.concat(process.env.VUE_APP_BACKEND_IP, ':', process.env.VUE_APP_BACKEND_PORT),
-        target: "http://x5d8sq.natappfree.cc/",
+        target: process.env.VUE_APP_HTTP_API,
         changeOrigin: true,
         pathRewrite: {
           ["^" + process.env.VUE_APP_BASE_API]: "",

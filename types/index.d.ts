@@ -3,6 +3,7 @@ interface chartDataset {
   dimensions: Array;
   source: Array;
 }
+
 interface position2D {
   x: number;
   y: number;
@@ -10,6 +11,7 @@ interface position2D {
 interface position3D extends position2D {
   z: number;
 }
+
 interface barSingleData {
   id: string,
   result: boolean

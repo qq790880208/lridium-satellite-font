@@ -8,8 +8,8 @@ import "echarts-gl";
 import { useElementPlus } from "@/plugins/element-plus";
 import "./css/index.css";
 import "element-plus/dist/index.css";
-import "swiper/css";
-import "swiper/css/pagination";
+// import "swiper/css";
+// import "swiper/css/pagination";
 
 // import router from "./router";
 // import store from "./store";
