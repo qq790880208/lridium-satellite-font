@@ -88,7 +88,7 @@ function modifyLottieStatus(step: number) {
 
 <template>
   <base-chart-background
-    height="calc(100vh - 130px)"
+    height="calc(100vh - 120px)"
     title="模型示意"
     width="410px"
   >
@@ -117,5 +117,8 @@ function modifyLottieStatus(step: number) {
   bottom: 15px;
   position: absolute;
   width: 100%;
+  .el-progress__text {
+    color: #FFFFFF
+  }
 }
 </style>

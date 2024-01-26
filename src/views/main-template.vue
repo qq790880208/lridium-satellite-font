@@ -234,7 +234,7 @@ function setStepData(step: number, data: any) {
       break;
     case 2:
       // `${process.env.VUE_APP_HTTP_API}/${data.image_dict}` TODO
-      depthImageList.value = depthImageList.value.concat([`${data.image_dict}`]);
+      depthImageList.value = depthImageList.value.concat([`${process.env.VUE_APP_HTTP_API}/${data.image_dict}`]);
       break;
     case 3:
       eChart3Data.value = data.value;
@@ -252,7 +252,7 @@ function setStepData(step: number, data: any) {
 <template>
   <base-chart-background
     class="main-template"
-    height="calc((100vh - 118px))"
+    height="calc((100vh - 120px))"
     title="系统概述"
     width="100%"
   >

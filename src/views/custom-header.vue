@@ -27,18 +27,18 @@ const aMenuList = ref([
     id: 1,
     name: "铱星系统",
   },
-  {
-    id: 2,
-    name: "菜单1",
-  },
-  {
-    id: 4,
-    name: "菜单2",
-  },
-  {
-    id: 5,
-    name: "菜单3",
-  },
+  // {
+  //   id: 2,
+  //   name: "菜单1",
+  // },
+  // {
+  //   id: 4,
+  //   name: "菜单2",
+  // },
+  // {
+  //   id: 5,
+  //   name: "菜单3",
+  // },
 ]);
 
 const aDepthList = ref([
