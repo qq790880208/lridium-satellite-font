@@ -9,6 +9,8 @@ import { useStore } from "@/store/modules";
 import { storeToRefs } from "pinia";
 import { onBeforeUnmount, ref, shallowRef, watch } from "vue";
 import type { Ref } from "vue";
+import { randomNumber } from "@/utils";
+import { random as _random } from "lodash";
 
 // import { get } from "lodash";
 
@@ -37,6 +39,7 @@ let webSocketInstance: null | IridiumSocket = null;
 
 const barSingleData = ref({} as Array<Array<number>>);
 const lineListData = ref([] as Array<lineData>);
+let AuthCount = 1;
 
 getBar();
 getLine();
@@ -56,14 +59,15 @@ onBeforeUnmount(() => {
 
 async function handleStatusChange(status: string, modelSize: number) {
   try {
-    const url = `${process.env.VUE_APP_WS_API}`;
+    // TODO
+    // const url = `ws://${process.env.NODE_ENV === "production" ? '' : ''}${process.env.VUE_APP_WS_API}ws/iridium_group/`;
+    const url = `ws://${process.env.NODE_ENV === "production" ? window.location.host : ''}${process.env.VUE_APP_WS_API}ws/iridium_group/`;
     if (status === "false") {
-      getWebsocketAddress(status)
+      getWebsocketAddress(status);
       webSocketInstance?.dispose();
       return;
     }else {
       getWebsocketAddress(status).finally(() => {
-        // TODO
         webSocketInstance = new IridiumSocket(url, handleWebsocketMessage, depth.value);
       })
     }
@@ -74,8 +78,15 @@ async function handleStatusChange(status: string, modelSize: number) {
 
 async function getBar() {
   try {
-    const response = await getBarData({});
-    barSingleData.value = JSON.parse(response).data;
+    // const response = await getBarData({});
+    // barSingleData.value = JSON.parse(response).data;
+    // TODO 数据展示用
+    barSingleData.value = new Array(66).fill([]).map(() => {
+      return [
+        randomNumber(200, 300),
+        randomNumber(1, 2),
+      ]
+    })
   } catch (e) {
     console.error(e);
     barSingleData.value = [];
@@ -84,8 +95,20 @@ async function getBar() {
 
 async function getLine() {
   try {
-    const response = await getLineData();
-    lineListData.value = lineListData.value.concat([response]);
+    // const response = await getLineData();
+    const Precision = _random(0.9, 1, true);
+    // TODO 数据展示用
+    const response = {
+      AuthCount: AuthCount++,
+      Precision: Precision,
+      errorRate: 1 - Precision
+    }
+    if(lineListData.value.length < 100) {
+      lineListData.value = lineListData.value.concat([response]);
+    }else {
+      AuthCount = 1;
+      lineListData.value = lineListData.value.slice(50).concat([response])
+    }
   } catch (e) {
     console.error(e);
   }

@@ -234,6 +234,7 @@ function setStepData(step: number, data: any) {
       break;
     case 2:
       // `${process.env.VUE_APP_HTTP_API}/${data.image_dict}` TODO
+      // depthImageList.value = depthImageList.value.concat([`${data.image_dict}`]);
       depthImageList.value = depthImageList.value.concat([`${process.env.VUE_APP_HTTP_API}/${data.image_dict}`]);
       break;
     case 3:

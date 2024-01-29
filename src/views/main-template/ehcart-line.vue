@@ -71,7 +71,7 @@ const handleChartInit = (val: EChartsType) => {
     series: new Array(2).fill({
       type: 'line',
       label: {
-        show: true,
+        show: false,
         formatter: (value: any) => `${getPercent(value)}%`
       },
       top: otherProps.value?.legend?.top + 30 || 0,
