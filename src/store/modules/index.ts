@@ -61,6 +61,12 @@ export const useStore = defineStore("main", {
       this.frameList = index > -1 ? this.frameList.slice(0, index + 1) : [];
     },
     push(val: frame) {
+      // 如果超过100个
+      // if(this.frameList.length > 100) {
+      //   const newFrameList = this.frameList.slice(50);
+      //   const startIndex = newFrameList.findIndex(item => item.Step === 1);
+      //   this.frameList = newFrameList.slice(startIndex);
+      // }
       this.frameList.push(val);
     },
     remove() {

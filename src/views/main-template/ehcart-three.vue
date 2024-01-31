@@ -17,14 +17,15 @@ const props = defineProps<threeChartProps>()
 
 const { dataSet } = toRefs(props)
 
-watch(() => dataSet.value, (val) => {
+watch(() => dataSet.value, (value) => {
   if(chart) {
-    // chart.setOption({
-    //   dataset: {
-    //     dimensions: ["Q", "I", "Time"],
-    //     source: val,
-    //   },
-    // })
+    // console.info(value)
+    chart.setOption({
+      dataset: {
+        dimensions: ["Quadrature", "In-phase","Layer",  'Color'],
+        source: value,
+      },
+    })
   }
 })
 
@@ -32,27 +33,33 @@ const handleChartInit = (val: EChartsType) => {
   chart = val;
   chart.setOption({
     dataset: {
-      dimensions: ["Q", "I", "Time"],
-      source: [
-        [randomNumber(1, 10), randomNumber(1, 10), randomNumber(1, 10)],
-        [randomNumber(1, 10), randomNumber(1, 10), randomNumber(1, 10)],
-        [randomNumber(1, 10), randomNumber(1, 10), randomNumber(1, 10)],
-        [randomNumber(1, 10), randomNumber(1, 10), randomNumber(1, 10)],
-        [randomNumber(1, 10), randomNumber(1, 10), randomNumber(1, 10)],
-        [randomNumber(1, 10), randomNumber(1, 10), randomNumber(1, 10)],
-        [randomNumber(1, 10), randomNumber(1, 10), randomNumber(1, 10)],
-        [randomNumber(1, 10), randomNumber(1, 10), randomNumber(1, 10)],
-      ],
+      dimensions: [ "Quadrature", "In-phase","Layer", 'Color'],
+      source: [],
+      // source: [
+      //   [randomNumber(1, 10), randomNumber(1, 10), randomNumber(1, 10), randomNumber(100, 255)],
+      //   [randomNumber(1, 10), randomNumber(1, 10), randomNumber(1, 10), randomNumber(1, 10)],
+      //   [randomNumber(1, 10), randomNumber(1, 10), randomNumber(1, 10), randomNumber(1, 10)],
+      //   [randomNumber(1, 10), randomNumber(1, 10), randomNumber(1, 10), randomNumber(1, 10)],
+      //   [randomNumber(1, 10), randomNumber(1, 10), randomNumber(1, 10), randomNumber(1, 10)],
+      //   [randomNumber(1, 10), randomNumber(1, 10), randomNumber(1, 10), randomNumber(1, 10)],
+      //   [randomNumber(1, 10), randomNumber(1, 10), randomNumber(1, 10), randomNumber(1, 10)],
+      //   [randomNumber(1, 10), randomNumber(1, 10), randomNumber(1, 10), randomNumber(1, 10)],
+      // ],
     },
     visualMap: {
       type: "piecewise",
+      show: false,
       pieces: [
-        { lte: 0, color: "#336882", colorAlpha: 0.3 },
-        { gt: 0, lte: 10, color: "#b5e4ff", colorAlpha: 0.5 },
-        { gt: 10, lte: 50, color: "#d7ffcf", colorAlpha: 0.6 },
-        { gt: 50, lte: 100, color: "#ffcf78", colorAlpha: 0.8 },
-        { gt: 100, lte: 255, color: "#ffb79a", colorAlpha: 1 },
+        { lte: 0, color: "#336882", colorAlpha: 0 },
+        { gt: 0, lte: 10, color: "#b5e4ff", colorAlpha: 0.2 },
+        { gt: 10, lte: 20, color: "#d7ffcf", colorAlpha: 0.4 },
+        { gt: 20, lte: 60, color: "#ffcf78", colorAlpha: 0.6 },
+        { gt: 30, color: "#ffb79a", colorAlpha: 0.8 },
+        // { gt: 80, lte: 100, color: "#ffb79a", colorAlpha: 1 },
       ],
+      textStyle: {
+        color: '#FFFFFF'
+      }
     },
     tooltip: {
       show: true,
@@ -77,6 +84,10 @@ const handleChartInit = (val: EChartsType) => {
         lineStyle: { color: "#fff" },
       },
       viewControl: {
+        distance: 160,
+        alpha: -70,
+        beta: 90,
+        center: [10, 0, 10],
         // autoRotate: true
       },
     },
@@ -84,6 +95,7 @@ const handleChartInit = (val: EChartsType) => {
       {
         type: "scatter3D",
         symbol: "circle",
+        symbolSize: 6
       },
     ],
   });

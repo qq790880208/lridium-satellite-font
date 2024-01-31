@@ -30,14 +30,14 @@ const { lineListData, barSingleData } = toRefs(props)
 <template>
   <base-chart-background
     height="calc((100vh - 130px) / 2)"
-    title="认证次数"
+    title="实时认证结果"
     width="410px"
   >
     <e-chart-line :data="lineListData"></e-chart-line>
   </base-chart-background>
   <base-chart-background
     height="calc((100vh - 130px) / 2)"
-    title="IRA帧个数"
+    title="历史认证结果"
     width="410px"
   >
     <e-chart-bar :data="barSingleData"></e-chart-bar>

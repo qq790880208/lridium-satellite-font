@@ -139,7 +139,7 @@ const playStep = (step: number, timeout: number) => {
             refDepthImage.value.startAnimation(timeout).then(() => {
               resolve(true);
             });
-          } else {
+          } else if(depth.value > depthImageList.value.length) {
             stopTimeoutId = setTimeout(() => {
               resolve(true);
             }, timeout);
@@ -189,7 +189,7 @@ function animation() {
       return;
     }
     if (currentFrame) {
-      const text = `${currentFrame.Description}: ${currentFrame.Body}`;
+      const text = `${currentFrame.Description}: ${currentFrame?.Body || ''}`;
       handleDosText(text);
       setStepData(currentFrame.Step, currentFrame);
       const animationTime = oStepConsumesTime.value[currentFrame.Step];
@@ -235,10 +235,12 @@ function setStepData(step: number, data: any) {
     case 2:
       // `${process.env.VUE_APP_HTTP_API}/${data.image_dict}` TODO
       // depthImageList.value = depthImageList.value.concat([`${data.image_dict}`]);
-      depthImageList.value = depthImageList.value.concat([`${process.env.VUE_APP_HTTP_API}/${data.image_dict}`]);
+      if(depth.value > depthImageList.value.length) {
+        depthImageList.value = depthImageList.value.concat([`${process.env.VUE_APP_HTTP_API}${data.Body}`]);
+      }
       break;
     case 3:
-      eChart3Data.value = data.value;
+      eChart3Data.value = data.Body;
       break;
     case 4:
       result.value = data.Body === 0 ? "exception" : "success";

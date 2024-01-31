@@ -39,7 +39,9 @@ const computedTitledImageStyle = computed(() => {
   const length = imageList.value.length;
   // const height = getHeight(length);
   const width = getWidth(length);
+  const height = getHeight(length);
   return {
+    height,
     width
   };
 });
@@ -96,7 +98,8 @@ function generateAnimationStep(dom: Element, index: number, duration?: number, o
     translateX: (index * 10) - 20,
     translateY: (index * 10) - 20,
     opacity,
-    duration
+    duration,
+    loop: false
   };
 }
 
@@ -132,16 +135,24 @@ function startAnimation(time: number) {
 // }
 
 function getHeight(length: number) {
-  let height = "100%";
+  let height: string;
   switch (length) {
-    case 3:
-      height = `calc(100% / 2)`;
+    case 1:
+      height = "100%";
       break;
+    case 2:
+    case 3:
+      height = `calc((100% - 30px) / 2)`;
+      break;
+    case 4:
     case 5:
+    case 6:
     case 7:
-      height = `calc(100% / 3)`;
+    default:
+      height = `calc((100% - 30px) / 3)`;
       break;
   }
+  return height
 }
 
 function getWidth(length: number) {

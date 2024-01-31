@@ -27,14 +27,14 @@ const aMenuList = ref([
     id: 1,
     name: "铱星系统",
   },
-  // {
-  //   id: 2,
-  //   name: "菜单1",
-  // },
-  // {
-  //   id: 4,
-  //   name: "菜单2",
-  // },
+  {
+    id: 2,
+    name: "GPS认证",
+  },
+  {
+    id: 4,
+    name: "5G认证",
+  },
   // {
   //   id: 5,
   //   name: "菜单3",
@@ -110,6 +110,7 @@ const handleEndClick = () => {
     >
       <span>{{ menu.name }}</span>
     </div>
+    <span class="app-header__desc">选择深度</span>
     <el-select
       :model-value="depth"
       placeholder="请选择数据深度"
@@ -160,6 +161,12 @@ const handleEndClick = () => {
     line-height: 70px;
     position: relative;
     z-index: 2;
+    &__desc {
+      top: 10px;
+      position: relative;
+      color: #ffffff;
+      margin: 0 10px 0 0;
+    }
     &__title {
       background: linear-gradient(0deg, #1dd4ff 8%, #ffffff 99%);
       background-clip: text;
