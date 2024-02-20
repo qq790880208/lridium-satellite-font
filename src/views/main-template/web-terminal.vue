@@ -33,7 +33,7 @@ watch(
       // TerminalApi.clearLog('my-terminal', true);
       terminalInstance.value.clearLog(false);
       terminalInstance.value.clearLog(true);
-      terminalInstance.value.pushMessage({ type: 'normal', class: 'info', content: '系统正在初始化，请稍候...' });
+      terminalInstance.value.pushMessage({ type: 'normal', class: 'info', content: '系统正在收集信号，请稍候...' });
     }
   }
 );
@@ -46,7 +46,7 @@ watch(
     title="dos"
     context="dos"
     :init-log="[
-      { type: 'normal', class: 'info', content: '系统正在初始化，请稍候...' },
+      { type: 'normal', class: 'info', content: '系统正在收集信号，请稍候...' },
     ]"
     :log-size-limit="50"
     :show-header="false"

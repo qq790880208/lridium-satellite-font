@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { get as _get } from "lodash";
 import { storeToRefs } from "pinia";
 import { defineEmits, nextTick, onBeforeUnmount, reactive, ref, watch } from "vue";
 import { useStore } from "@/store/modules";
@@ -9,7 +10,7 @@ import WebTerminal from "@/views/main-template/web-terminal.vue";
 import VerifyResult from "@/views/main-template/verify-result.vue";
 import { ceil } from "lodash";
 
-const emits = defineEmits(["frameStep"]);
+const emits = defineEmits(["frameStep", "frameStepEnd"]);
 
 const store = useStore();
 
@@ -19,7 +20,7 @@ const state = storeToRefs(store);
 
 const order = ref(1);
 
-const dosText = ref("测试开始");
+const dosText = ref("");
 
 const refDepthImage = ref();
 
@@ -111,14 +112,14 @@ const play = () => {
   oShowList.img = false;
   oShowList.dos = true;
   clearDisplayStatus();
-  dosText.value = `开始, 第${order.value}帧`;
+  // dosText.value = `开始, 第${order.value}帧`;
   animation();
   // TODO 临时展示
   // interval1 = setInterval(animation, 11000);
 };
 
 const stop = () => {
-  order.value = 1;
+  // order.value = 1;
   dosText.value = "结束";
   // clearDisplayStatus();
   // clearTimeout(stopTimeoutId);
@@ -163,6 +164,7 @@ const playStep = (step: number, timeout: number) => {
       default:
         stopTimeoutId = setTimeout(() => {
           clearDisplayStatus();
+          emits('frameStepEnd')
           resolve(true);
         }, 9000);
         break;
@@ -190,7 +192,7 @@ function animation() {
     }
     if (currentFrame) {
       const text = `${currentFrame.Description}: ${currentFrame?.Body || ''}`;
-      handleDosText(text);
+      handleDosText(currentFrame.Step, currentFrame?.Body, text);
       setStepData(currentFrame.Step, currentFrame);
       const animationTime = oStepConsumesTime.value[currentFrame.Step];
       // nCurrentAnimationTime.value = animationTime * currentFrame.Step;
@@ -211,20 +213,28 @@ function setDosText(text: string) {
   dosText.value = text;
 }
 
-function handleDosText(text: string) {
-  let maxLength = 1000;
-  // dos显示内容超过1000个字符，添加防抖，每5000字符加一次
-  if (text.length > maxLength) {
-    const number = ceil(text.length / maxLength);
-    // for (let i = 0; i < number; i++) {
-    //   setTimeout(() => {
-    //     setDosText(text.substring(i * maxLength, i * maxLength + maxLength));
-    //   }, i * 100);
-    // }
-    setDosText(text.substring(0, maxLength));
-  } else {
-    setDosText(text);
+function handleDosText(step: number, data: any, text: string) {
+  const oStep2Text = {
+    1: "正在收集信号",
+    2: "正在解析数据",
+    3: "正在处理数据",
+    4: data === 0 ? "验证失败" : "验证成功",
+    5: text
   }
+  setDosText(_get(oStep2Text, step.toString(), ""));
+  // let maxLength = 1000;
+  // // dos显示内容超过1000个字符，添加防抖，每5000字符加一次
+  // if (text.length > maxLength) {
+  //   const number = ceil(text.length / maxLength);
+  //   // for (let i = 0; i < number; i++) {
+  //   //   setTimeout(() => {
+  //   //     setDosText(text.substring(i * maxLength, i * maxLength + maxLength));
+  //   //   }, i * 100);
+  //   // }
+  //   setDosText(text.substring(0, maxLength));
+  // } else {
+  //   setDosText(text);
+  // }
 }
 
 // TODO
@@ -233,9 +243,9 @@ function setStepData(step: number, data: any) {
     case 1:
       break;
     case 2:
-      // `${process.env.VUE_APP_HTTP_API}/${data.image_dict}` TODO
       // depthImageList.value = depthImageList.value.concat([`${data.image_dict}`]);
       if(depth.value > depthImageList.value.length) {
+        // depthImageList.value = depthImageList.value.concat("/images/grayScale.jpg")
         depthImageList.value = depthImageList.value.concat([`${process.env.VUE_APP_HTTP_API}${data.Body}`]);
       }
       break;

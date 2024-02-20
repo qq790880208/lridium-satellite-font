@@ -153,6 +153,10 @@ function handleFrameStart(step: number, timeout: number, result: string) {
   refLeftAnimation.value.startAnimation(step, timeout, result)
 }
 
+// function handleFrameEnd() {
+//   refLeftAnimation.value.startAnimation(step, timeout, result)
+// }
+
 </script>
 
 <template>

@@ -3,7 +3,7 @@ import BaseChartBackground from "@/components/base-components/base-chart-backgro
 import lottie from "lottie-web";
 import type { AnimationItem } from "lottie-web";
 import animationData from "./animations/data.json";
-import { computed, onBeforeUnmount, onMounted, ref } from "vue";
+import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import type { Ref } from "vue";
 import { storeToRefs } from "pinia";
 import { useStore } from "@/store/modules";
@@ -38,9 +38,22 @@ onBeforeUnmount(() => {
   clearInterval(intervalId);
 })
 
+watch(state.frameStatus, (value) => {
+  modifyLottieStatus(value === 'pending')
+})
+
 function startAnimation(step: number, timeout: number, result = '') {
   modifyProcessStatus(step, timeout, result);
-  modifyLottieStatus(step);
+  modifyLottieStatus(step === 1 || step === 2 || step === 5);
+}
+
+function modifyLottieStatus(status: boolean) {
+  console.info(status)
+  if(status) {
+    lottieInstance.play();
+  }else {
+    lottieInstance.stop();
+  }
 }
 
 function modifyProcessStatus(step: number, timeout: number, result: string) {
@@ -66,24 +79,27 @@ function modifyProcessStatus(step: number, timeout: number, result: string) {
   // timeOut.value = timeout;
 }
 
-function modifyLottieStatus(step: number) {
-  // lottieInstance.stop();
-  switch (step) {
-    case 1:
-      lottieInstance.playSegments([0, 25], true);
-      break;
-    case 2:
-      lottieInstance.playSegments([25, 37.5], true);
-      break;
-    case 3:
-    case 4:
-      lottieInstance.playSegments([37.5, 50], true);
-      break;
-    default:
-      lottieInstance.playSegments([0, 0.001], true);
-      break;
-  }
-}
+// function modifyLottieStatus(step: number) {
+//   // lottieInstance.stop();
+//   switch (step) {
+//     case 1:
+//       // lottieInstance.play();
+//       // lottieInstance.playSegments([0, 25], true);
+//       break;
+//     case 2:
+//       // lottieInstance.playSegments([25, 37.5], true);
+//       break;
+//     case 3:
+//     case 4:
+//       lottieInstance.stop();
+//       // lottieInstance.playSegments([37.5, 50], true);
+//       break;
+//     default:
+//       // lottieInstance.playSegments([0, 0.001], true);
+//       break;
+//   }
+// }
+
 </script>
 
 <template>
