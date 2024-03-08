@@ -4,10 +4,10 @@ import { storeToRefs } from "pinia";
 import { defineEmits, nextTick, onBeforeUnmount, reactive, ref, watch } from "vue";
 import { useStore } from "@/store/modules";
 import BaseChartBackground from "@/components/base-components/base-chart-background.vue";
-import Echart from "@/views/main-template/ehcart-three.vue";
-import SwiperDepth from "@/views/main-template/swiper-depth.vue";
-import WebTerminal from "@/views/main-template/web-terminal.vue";
-import VerifyResult from "@/views/main-template/verify-result.vue";
+import Echart from "@/views/iridium/main-template/ehcart-three.vue";
+import SwiperDepth from "@/views/iridium/main-template/swiper-depth.vue";
+import WebTerminal from "@/views/iridium/main-template/web-terminal.vue";
+import VerifyResult from "@/views/iridium/main-template/verify-result.vue";
 import { ceil } from "lodash";
 
 const emits = defineEmits(["frameStep", "frameStepEnd"]);
@@ -292,6 +292,7 @@ function setStepData(step: number, data: any) {
         v-show="oShowList.depth"
         ref="refDepthImage"
         :image-list="depthImageList"
+        :depth="depth"
       ></swiper-depth>
     </div>
     <div class="main-template__block">

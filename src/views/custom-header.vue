@@ -5,6 +5,9 @@ import { storeToRefs } from "pinia";
 import { computed, onBeforeUnmount, ref, watch } from "vue";
 import { SuccessFilled, CircleCloseFilled } from "@element-plus/icons-vue";
 import { useStore } from "@/store/modules";
+import { useRoute, useRouter } from "vue-router";
+import IridiumSelect from "@/views/header-select/iridium-select.vue";
+import GpsSelect from "@/views/header-select/gps-select.vue";
 
 dayjs.extend(isoWeek);
 
@@ -16,9 +19,13 @@ const store = useStore();
 
 const state = storeToRefs(store);
 
+const router = useRouter();
+
 const frameStatus = state.frameStatus;
 
 const depth = state.depth;
+
+const channel = state.channel;
 
 const selectMenuID = ref(1);
 
@@ -26,14 +33,17 @@ const aMenuList = ref([
   {
     id: 1,
     name: "铱星系统",
+    route: "/iridium"
   },
   {
     id: 2,
     name: "GPS认证",
+    route: "/gps"
   },
   {
     id: 4,
     name: "5G认证",
+    route: "/iridium"
   },
   // {
   //   id: 5,
@@ -69,6 +79,8 @@ const aDepthList = ref([
   },
 ]);
 
+const aChannelList = new Array(8).fill(0).map((item, index) => index + 1);
+
 const selectMenuName = computed(() => {
   return aMenuList.value.find(item => item.id === selectMenuID.value)?.name
 })
@@ -83,11 +95,18 @@ onBeforeUnmount(() => {
   intervalId && clearInterval(intervalId);
 });
 
+// watch(() => selectMenuID.value, (value) => {
+//   if(value === 1) {
+//
+//   }else {
+//
+//   }
+// })
 
-
-const handleMenuClick = (val: number) => {
+const handleMenuClick = (val: number, path: string) => {
   selectMenuID.value = val;
-  handleEndClick()
+  handleEndClick();
+  router.push(path);
 };
 const handleStartClick = () => {
   store.start();
@@ -106,40 +125,12 @@ const handleEndClick = () => {
       v-for="menu of aMenuList"
       :key="menu.id"
       :class="{ active: menu.id === selectMenuID }"
-      @click="handleMenuClick(menu.id)"
+      @click="() => { handleMenuClick(menu.id, menu.route) }"
     >
       <span>{{ menu.name }}</span>
     </div>
-    <span class="app-header__desc">选择深度</span>
-    <el-select
-      :model-value="depth"
-      placeholder="请选择数据深度"
-      style="margin: 0 10px 0 0"
-      :disabled="frameStatus !== 'stopped'"
-      @change="store.changeDepth"
-    >
-      <el-option
-        v-for="depth of aDepthList"
-        :key="depth.id"
-        :value="depth.value"
-        :label="depth.label"
-      ></el-option>
-    </el-select>
-    <el-button
-      type="primary"
-      :icon="SuccessFilled"
-      :loading="frameStatus === 'pending'"
-      :disabled="frameStatus !== 'stopped' || !depth"
-      @click="handleStartClick"
-      >开始</el-button
-    >
-    <el-button
-      type="success"
-      :icon="CircleCloseFilled"
-      :disabled="frameStatus === 'stopped'"
-      @click="handleEndClick"
-      >结束</el-button
-    >
+    <gps-select v-if="selectMenuID === 2"></gps-select>
+    <iridium-select v-else></iridium-select>
     <div class="app-header__right">
       <p class="app-header__right__time">{{ time }}</p>
       <div class="app-header__right__date">
@@ -217,12 +208,22 @@ const handleEndClick = () => {
 
     .el-select {
       position: relative;
-      width: 200px;
+      width: 100px;
       top: 10px;
     }
     .el-button {
       position: relative;
       top: 10px;
+    }
+  }
+}
+
+@media screen and (min-width: 1024px) and (max-width: 1440px) {
+  .app {
+    &-header {
+      &__menu {
+        font-size: 16px;
+      }
     }
   }
 }

@@ -11,11 +11,11 @@ import "element-plus/dist/index.css";
 // import "swiper/css";
 // import "swiper/css/pagination";
 
-// import router from "./router";
+import router from "./router";
 // import store from "./store";
 const app = createApp(App);
 
-app.use(pinia);
+app.use(pinia).use(router);
 
 // app.use(Terminal);
 

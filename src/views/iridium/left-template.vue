@@ -2,7 +2,7 @@
 import BaseChartBackground from "@/components/base-components/base-chart-background.vue";
 import lottie from "lottie-web";
 import type { AnimationItem } from "lottie-web";
-import animationData from "./animations/data.json";
+import animationData from "../animations/data.json";
 import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import type { Ref } from "vue";
 import { storeToRefs } from "pinia";
@@ -48,7 +48,6 @@ function startAnimation(step: number, timeout: number, result = '') {
 }
 
 function modifyLottieStatus(status: boolean) {
-  console.info(status)
   if(status) {
     lottieInstance.play();
   }else {
@@ -106,7 +105,7 @@ function modifyProcessStatus(step: number, timeout: number, result: string) {
   <base-chart-background
     height="calc(100vh - 120px)"
     title="模型示意"
-    width="410px"
+    width="100%"
   >
     <div ref="refDiv" class="left-animation"></div>
     <div class="left-progress">

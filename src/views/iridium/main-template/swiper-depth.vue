@@ -6,16 +6,19 @@ import anime from "animejs/lib/anime.es.js";
 
 interface swiperProps {
   imageList: Array<string>;
+  show: boolean;
+  depth: number;
 }
 
 const props = withDefaults(defineProps<swiperProps>(), {
   imageList: () => {
     return [];
   },
-  show: false
+  show: false,
+  depth: 1
 });
 
-const { imageList, show } = toRefs(props)
+const { imageList, show, depth } = toRefs(props)
 
 const emits = defineEmits(["animationFinish"]);
 
@@ -33,7 +36,7 @@ const promiseAnimationList = ref([] as Array<Promise<boolean>>);
 // });
 const refImageDomList = ref([] as Array<HTMLImageElement>);
 const refTitledImage = ref();
-const tiledImageOpacity = ref(1);
+// const tiledImageOpacity = ref(1);
 
 const computedTitledImageStyle = computed(() => {
   const length = imageList.value.length;
@@ -54,7 +57,7 @@ watch(
       // });
     } else {
       promiseAnimationList.value = [];
-      tiledImageOpacity.value = 1;
+      // tiledImageOpacity.value = 1;
       // promiseAnimationTimeline = anime.timeline({
       //   easing: "easeInOutExpo"
       // });
@@ -108,7 +111,9 @@ function generateAnimationTimeLine(time: number) {
     easing: "easeInOutExpo",
     loop: false
   })
-  promiseAnimationTimeline.add(generateAnimationStep(refTitledImage.value as HTMLElement, 2, 3000, [1, 0]));
+  promiseAnimationTimeline.add(Object.assign(generateAnimationStep(refTitledImage.value as HTMLElement, 2, 3000, [1, 0]), {
+
+  }));
   const domList = document.querySelectorAll('.depth-img__image');
   if(domList.length === 1) {
     domList.forEach(item => {
@@ -182,7 +187,7 @@ function getWidth(length: number) {
   <!--    <div class="swiper-wrapper">-->
   <div style="height: 100%;width: 100%">
     <div class="tiled-img" ref="refTitledImage" :style="{
-      opacity: tiledImageOpacity,
+      opacity: depth === 1 ? 0 : 1,
       flexWrap: imageList.length === 3 ? 'wrap-reverse' : 'warp',
       justifyContent: imageList.length === 7 ? 'start' : 'warp'
     }">

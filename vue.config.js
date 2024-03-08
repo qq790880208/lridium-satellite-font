@@ -7,7 +7,7 @@ module.exports = defineConfig({
       .use("worker")
       .loader("worker-loader")
       .options({ inline: "fallback" });
-    config.plugin('webpack-bundle-analyzer').use(require('webpack-bundle-analyzer').BundleAnalyzerPlugin);
+    // config.plugin('webpack-bundle-analyzer').use(require('webpack-bundle-analyzer').BundleAnalyzerPlugin);
   },
   productionSourceMap: false,
   parallel: false,

@@ -7,7 +7,7 @@ export default class IridiumSocket {
     this.webSocket = new WebSocket(url);
     this.handleReceiveMessage = fn;
     this.openSocketFunction = () => {
-      // this.webSocket.send(depth.toString());
+      this.webSocket.send(depth.toString());
     };
     this.webSocket.addEventListener('open', this.openSocketFunction);
     this.webSocket.addEventListener('message', this.handleReceiveMessage);
