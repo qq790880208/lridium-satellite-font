@@ -150,7 +150,7 @@ function handleFrameStart(step: number, timeout: number, result: string) {
     getBar();
     getLine();
   }
-  refLeftAnimation.value.startAnimation(step, timeout, result)
+  refLeftAnimation.value?.startAnimation(step, timeout, result)
 }
 
 // function handleFrameEnd() {

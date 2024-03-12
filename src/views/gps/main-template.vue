@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { get as _get } from "lodash";
+import { ceil, get as _get } from "lodash";
 import { storeToRefs } from "pinia";
 import { defineEmits, nextTick, onBeforeUnmount, reactive, ref, watch, toRefs, onMounted } from "vue";
 import { useStore } from "@/store/modules";
@@ -29,6 +29,8 @@ const state = storeToRefs(store);
 const order = ref(1);
 
 const dosText = ref("");
+
+const dosIQText = ref("");
 
 const refDepthImage = ref();
 
@@ -200,7 +202,7 @@ function animation() {
       setStepData(currentFrame.Step, currentFrame);
       const animationTime = oStepConsumesTime.value[currentFrame.Step];
       // nCurrentAnimationTime.value = animationTime * currentFrame.Step;
-      emits("frameStep", currentFrame.Step, result.value, index.value);
+      emits("frameStep", currentFrame.Step, result.value, index.value, currentFrame?.ID);
       playStep(currentFrame.Step, animationTime).finally(animation);
     } else {
       stopTimeoutId = setTimeout(animation, 3000);
@@ -226,25 +228,29 @@ function handleDosText(step: number, data: any, text: string) {
     5: text
   }
   setDosText(_get(oStep2Text, step.toString(), ""));
-  // let maxLength = 1000;
-  // // dos显示内容超过1000个字符，添加防抖，每5000字符加一次
-  // if (text.length > maxLength) {
-  //   const number = ceil(text.length / maxLength);
-  //   // for (let i = 0; i < number; i++) {
-  //   //   setTimeout(() => {
-  //   //     setDosText(text.substring(i * maxLength, i * maxLength + maxLength));
-  //   //   }, i * 100);
-  //   // }
-  //   setDosText(text.substring(0, maxLength));
-  // } else {
-  //   setDosText(text);
-  // }
+}
+
+function dealtTextLimitLength(text: string) {
+  let maxLength = 1000;
+  // dos显示内容超过1000个字符，添加防抖，每5000字符加一次
+  if (text.length > maxLength) {
+    const number = ceil(text.length / maxLength);
+    // for (let i = 0; i < number; i++) {
+    //   setTimeout(() => {
+    //     setDosText(text.substring(i * maxLength, i * maxLength + maxLength));
+    //   }, i * 100);
+    // }
+    return text.substring(0, maxLength);
+  } else {
+    return text;
+  }
 }
 
 // TODO
 function setStepData(step: number, data: any) {
   switch (step) {
     case 1:
+      dosIQText.value = dealtTextLimitLength(data.Body);
       break;
     case 2:
       // depthImageList.value = depthImageList.value.concat([`${data.image_dict}`]);
@@ -260,6 +266,7 @@ function setStepData(step: number, data: any) {
       result.value = data.Body === 0 ? "exception" : "success";
       break;
     default:
+      dosIQText.value = 'end';
       order.value += 1;
       break;
   }
@@ -278,6 +285,18 @@ function setStepData(step: number, data: any) {
         <web-terminal :data="dosText" :index="index"></web-terminal>
       </div>
     </transition>
+    <transition name="el-fade-in">
+      <div class="main-template__gps__block" v-show="oShowList.dos">
+        <web-terminal :data="dosIQText" :index="(index + 1) * 10" init-text="IQ sequence"></web-terminal>
+      </div>
+    </transition>
+    <div class="main-template__gps__block">
+      <verify-result
+        v-show="oShowList.result"
+        ref="refVerifyResult"
+        :result="result"
+      ></verify-result>
+    </div>
     <div class="main-template__gps__block">
       <swiper-depth
         v-show="oShowList.depth"
@@ -286,18 +305,11 @@ function setStepData(step: number, data: any) {
         :depth="depth"
       ></swiper-depth>
     </div>
-    <div class="main-template__gps__block">
-      <verify-result
-        v-show="oShowList.result"
-        ref="refVerifyResult"
-        :result="result"
-      ></verify-result>
-    </div>
-    <transition name="el-fade-in">
+    <!--transition name="el-fade-in">
       <div class="main-template__gps__block">
         <echart v-show="oShowList.chart" :data-set="eChart3Data"></echart>
       </div>
-    </transition>
+    </transition-->
   </base-chart-background>
 </template>
 

@@ -11,6 +11,7 @@ import { onBeforeUnmount, ref, shallowRef, watch } from "vue";
 import type { Ref } from "vue";
 import { randomNumber } from "@/utils";
 import { random as _random } from "lodash";
+import { request } from "axios";
 
 // import { get } from "lodash";
 
@@ -75,7 +76,6 @@ async function getBar() {
     barSingleData.value = [];
   }
 }
-
 async function getLine() {
   try {
     const response = await getLineData();

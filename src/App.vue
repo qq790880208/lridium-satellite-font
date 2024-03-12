@@ -5,9 +5,11 @@ import CustomHeader from "@/views/custom-header.vue";
 <template>
   <img alt="" src="@/assets/app-bg.png" class="img-bg" />
   <custom-header></custom-header>
-  <keep-alive>
-    <router-view></router-view>
-  </keep-alive>
+  <router-view v-slot="{ Component }">
+    <keep-alive>
+      <component :is="Component" :key="$route.fullPath" />
+    </keep-alive>
+  </router-view>
 </template>
 
 <style lang="less">

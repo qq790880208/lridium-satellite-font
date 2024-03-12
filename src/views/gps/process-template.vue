@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onBeforeUnmount, ref, watch } from "vue";
+import { onBeforeUnmount, onDeactivated, ref, watch } from "vue";
 import { storeToRefs } from "pinia";
 import { getGPSWebSocketAddress, getWebSocketAddress } from "@/api";
 import { useStore } from "@/store/modules";
@@ -45,9 +45,11 @@ const oResult2Text = {
 
 watch(() => frameStatus.value, (value: string) => {
   if (value !== "pending") {
+    handleStatusChange("false", depth.value, channel.value);
     disconnectAllWebsocket();
     channelList.value = [];
   } else {
+    handleStatusChange("true", depth.value, channel.value);
     channelList.value = new Array(channel.value).fill(0).map((item, index) => {
       return {
         index,
@@ -61,9 +63,10 @@ watch(() => frameStatus.value, (value: string) => {
   channelList.value.forEach(item => {
     if (value === "pending") {
       // webSocketInstance = new IridiumSocket
-      handleStatusChange("true", depth.value, item.index);
+      // handleStatusChange("true", depth.value, item.index);
+      createWebSocket(item.index);
     } else {
-      handleStatusChange("false", depth.value, item.index);
+      // handleStatusChange("false", depth.value, item.index);
     }
   });
 });
@@ -73,27 +76,42 @@ onBeforeUnmount(() => {
   disconnectAllWebsocket();
 });
 
+onDeactivated(() => {
+  clearAllInterval();
+  disconnectAllWebsocket();
+})
+
 async function handleStatusChange(Status: string, modelSize: number, channel: number) {
   try {
     // TODO
     // const url = `ws://${process.env.NODE_ENV === "production" ? '' : ''}${process.env.VUE_APP_WS_API}ws/iridium_group/`;
-    const url = `ws://${process.env.NODE_ENV === "production" ? window.location.host : ""}${process.env.VUE_APP_WS_API}ws/channel${channel}/`;
+    // const url = `ws://${process.env.NODE_ENV === "production" ? window.location.host : ""}${process.env.VUE_APP_WS_API}ws/channel${channel}/`;
     if (Status === "false") {
-      getWebsocketAddress(Status);
+      getWebsocketAddress(Status, channel);
       return;
     } else {
       getWebsocketAddress(
-        Status
-      ).finally(() => {
-        webSocketInstance.push(new IridiumSocket(url, (e: MessageEvent) => {
-          handleWebsocketMessage(e, channel);
-        }, depth.value));
-      });
+        Status,
+        channel
+      )
+      //   .finally(() => {
+      //   webSocketInstance.push(new IridiumSocket(url, (e: MessageEvent) => {
+      //     handleWebsocketMessage(e, channel);
+      //   }, depth.value));
+      // });
     }
   } catch (e) {
     console.error(e);
   }
 }
+
+function createWebSocket(channel: number) {
+  const url = `ws://${process.env.NODE_ENV === "production" ? window.location.host : ""}${process.env.VUE_APP_WS_API}ws/channel${channel}/`;
+  webSocketInstance.push(new IridiumSocket(url, (e: MessageEvent) => {
+    handleWebsocketMessage(e, channel);
+  }, depth.value));
+}
+
 
 function handleWebsocketMessage(e: MessageEvent, index: number) {
   try {
@@ -102,7 +120,7 @@ function handleWebsocketMessage(e: MessageEvent, index: number) {
     // 如果是验证结果这一步，增加一个第5步，结束帧
     if (message.message.Step === 4) {
       store.multiplePush({
-        ID: -1,
+        ID: "",
         Type: "",
         Body: "",
         Description: "end",
@@ -125,19 +143,20 @@ function clearAllInterval() {
   Object.values(oIntervalId).forEach(intervalId => clearInterval(intervalId));
 }
 
-function handleFrameStart(step: number, result: "success" | "exception" | "warning", index: number) {
+function handleFrameStart(step: number, result: "success" | "exception" | "warning", index: number, id: string) {
   if (step === 5) {
     emit("frame-end");
   }
-  modifyProcessStatus(step, result, index);
+  modifyProcessStatus(step, result, index, id);
 }
 
 let oIntervalId = {} as Record<number, number>;
 
-function modifyProcessStatus(step: number, result: "success" | "exception" | "warning", index: number) {
+function modifyProcessStatus(step: number, result: "success" | "exception" | "warning", index: number, id: string) {
   clearInterval(oIntervalId[index]);
   const process = channelList.value[index];
   process.status = result;
+  process.prn = id || "";
   if (step === 5) {
     process.percentage = 0;
     process.status = "" as "success" | "exception" | "warning";
@@ -150,11 +169,12 @@ function modifyProcessStatus(step: number, result: "success" | "exception" | "wa
   }
 }
 
-async function getWebsocketAddress(status: string) {
+async function getWebsocketAddress(status: string, index: number) {
   try {
     await getGPSWebSocketAddress({
       Status: status,
-      modelSize: depth.value
+      modelSize: depth.value,
+      channel: index
     });
   } catch (e) {
     console.error(e);
@@ -214,7 +234,7 @@ function closeModal() {
       @click="handleProcessClick(channel.index)"
     >
       <div class="process__gps__process__text">{{ `channel${channel.index}` }}</div>
-      <div class="process__gps__process__text">{{ channel.prn }}</div>
+      <div class="process__gps__process__text" style="text-align: center">{{ channel.prn }}</div>
       <el-progress
         indeterminate
         :percentage="channel.percentage"

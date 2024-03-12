@@ -26,7 +26,7 @@ let chart: EChartsType;
 
 // onMounted(() => {});
 
-const ids = [2, 3, 4, 5, 6, 7, 8, 9, 13, 16, 17, 18, 22, 23, 24, 25, 26, 28, 29, 30, 33, 36, 38, 39, 40, 42, 43, 44, 46, 48, 49, 50, 51, 57, 65, 67, 68, 69, 71, 72, 73, 74, 77, 78, 79, 81, 82, 85, 87, 88, 89, 90, 92, 93, 94, 96, 99, 103, 104, 107, 109, 110, 111, 112, 114, 115]
+const ids = new Array(32).fill(0).map((item, index) => index + 1);
 
 let satelliteList: Array<resultData> = ids.map((item, index) => {
   return {
@@ -101,7 +101,7 @@ const handleChartInit = (val: EChartsType) => {
     yAxis: [
       {
         type: 'value',
-        name: "数量（次）",
+        name: "",
         nameGap: 25,
         nameLocation: "middle",
         axisLabel: { textStyle: { color: '#FFFFFF' } },

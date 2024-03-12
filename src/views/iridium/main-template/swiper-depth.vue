@@ -114,7 +114,7 @@ function generateAnimationTimeLine(time: number) {
   promiseAnimationTimeline.add(Object.assign(generateAnimationStep(refTitledImage.value as HTMLElement, 2, 3000, [1, 0]), {
 
   }));
-  const domList = document.querySelectorAll('.depth-img__image');
+  const domList = refImageDomList.value; // document.querySelectorAll('.depth-img__image');
   if(domList.length === 1) {
     domList.forEach(item => {
       promiseAnimationTimeline.add(generateAnimationStep(item, 2, time, [0, 1]));
@@ -201,6 +201,7 @@ function getWidth(length: number) {
     </div>
     <div class="depth-img">
       <img
+        ref="refImageDomList"
         class="depth-img__image"
         v-for="(image, index) of imageList"
         :key="index"

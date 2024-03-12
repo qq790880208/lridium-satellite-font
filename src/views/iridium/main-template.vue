@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { get as _get } from "lodash";
 import { storeToRefs } from "pinia";
-import { defineEmits, nextTick, onBeforeUnmount, reactive, ref, watch } from "vue";
+import { defineEmits, nextTick, onBeforeUnmount, onDeactivated, reactive, ref, watch } from "vue";
 import { useStore } from "@/store/modules";
 import BaseChartBackground from "@/components/base-components/base-chart-background.vue";
 import Echart from "@/views/iridium/main-template/ehcart-three.vue";
@@ -94,6 +94,10 @@ onBeforeUnmount(() => {
   stop();
 });
 
+onDeactivated(() => {
+  stop();
+})
+
 watch(state.frameStatus, (value) => {
   if (value === "stopped") {
     stop();
@@ -137,7 +141,7 @@ const playStep = (step: number, timeout: number) => {
         oShowList.depth = true;
         nextTick(() => {
           if (depth.value === depthImageList.value.length) {
-            refDepthImage.value.startAnimation(timeout).then(() => {
+            refDepthImage.value?.startAnimation(timeout).then(() => {
               resolve(true);
             });
           } else if(depth.value > depthImageList.value.length) {
@@ -156,7 +160,7 @@ const playStep = (step: number, timeout: number) => {
       case 4:
         oShowList.result = true;
         nextTick(() => {
-          refVerifyResult.value.startAnimation(timeout).then(() => {
+          refVerifyResult.value?.startAnimation(timeout).then(() => {
             resolve(true);
           });
         });

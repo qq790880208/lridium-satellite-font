@@ -1,14 +1,17 @@
 <script setup lang="ts">
 import Terminal, { TerminalApi } from "vue-web-terminal";
 import 'vue-web-terminal/lib/theme/dark.css'
-import { onMounted, ref, watch } from "vue";
+import { onMounted, ref, toRefs, watch } from "vue";
 
 interface terminalProps {
   data: string;
   index: number;
+  initText?: string
 }
 
 const props = defineProps<terminalProps>();
+
+const { initText } = toRefs(props);
 
 const terminalInstance = ref();
 
@@ -34,7 +37,7 @@ watch(
       // TerminalApi.clearLog('my-terminal', true);
       terminalInstance.value.clearLog(false);
       terminalInstance.value.clearLog(true);
-      terminalInstance.value.pushMessage({ type: 'normal', class: 'info', content: '系统正在收集信号，请稍候...' });
+      terminalInstance.value.pushMessage({ type: 'normal', class: 'info', content: initText?.value || '系统正在收集信号，请稍候...' });
     }
   }
 );
@@ -47,7 +50,7 @@ watch(
     title="dos"
     context="dos"
     :init-log="[
-      { type: 'normal', class: 'info', content: '系统正在收集信号，请稍候...' },
+      { type: 'normal', class: 'info', content: initText || '系统正在收集信号，请稍候...' },
     ]"
     :log-size-limit="50"
     :show-header="false"

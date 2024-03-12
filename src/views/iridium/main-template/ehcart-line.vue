@@ -30,7 +30,7 @@ const otherProps = shallowRef({
   "tooltip": { show: true, formatter: toolTipFormatter },
   "legend": { "top": 0, "show": true, textStyle: { color: '#FFFFFF' }, formatter: formatter  },
   "xAxis": { "type": "category", "name": "认证次数", "nameGap": 25, "nameLocation": "middle", axisLabel: { textStyle: { color: '#FFFFFF' } }, nameTextStyle: { color: '#FFFFFF' } },
-  "yAxis": { "type": "value", "name": "百分比（%）", "nameLocation": "middle", "nameGap": 25, axisLabel: { textStyle: { color: '#FFFFFF' } } , nameTextStyle: { color: '#FFFFFF' } },
+  "yAxis": { "type": "value", "name": "", "nameLocation": "middle", "nameGap": 25, axisLabel: { textStyle: { color: '#FFFFFF' } } , nameTextStyle: { color: '#FFFFFF' } },
 })
 
 watch(() => data.value, (value) => {
