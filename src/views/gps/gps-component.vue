@@ -86,10 +86,10 @@ async function getLine() {
 }
 
 function handleFrameStart(step: number, timeout: number, result: string) {
-  if (step === 5) {
+  // if (step === 5) {
     getBar();
     getLine();
-  }
+  // }
   // refLeftAnimation.value.startAnimation(step, timeout, result)
 }
 

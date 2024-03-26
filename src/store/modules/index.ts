@@ -27,7 +27,10 @@ export const useStore = defineStore("main", {
         "3": 1500,
         "4": 1500
       } as Record<any, number>,
-      channel: 1
+      channel: 1,
+      oConnectWebSocket: {
+        status: false
+      } as connectWebsocket,
     };
   },
   getters: {
@@ -121,6 +124,9 @@ export const useStore = defineStore("main", {
     },
     changeChannel(val: number) {
       this.channel = val;
+    },
+    changeCanConnectWebSocket(val: connectWebsocket) {
+      this.oConnectWebSocket = val;
     }
   }
 });

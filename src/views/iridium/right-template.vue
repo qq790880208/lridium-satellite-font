@@ -4,8 +4,8 @@ import { markRaw, ref, shallowRef, toRefs, watch } from "vue";
 import { getBarData, getLineData } from "@/api";
 import BaseChartBackground from "@/components/base-components/base-chart-background.vue";
 import BaseChartInstance from "@/components/base-components/base-chart-instance.vue";
-import EChartLine from "@/views/gps/main-template/ehcart-line.vue";
-import EChartBar from "@/views/gps/main-template/ehcart-bar.vue"
+import EChartLine from "@/views/iridium/main-template/ehcart-line.vue";
+import EChartBar from "@/views/iridium/main-template/ehcart-bar.vue"
 
 interface lineData {
   AuthCount: number

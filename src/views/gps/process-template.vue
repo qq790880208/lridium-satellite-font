@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onBeforeUnmount, onDeactivated, ref, watch } from "vue";
 import { storeToRefs } from "pinia";
-import { getGPSWebSocketAddress, getWebSocketAddress } from "@/api";
+import { getGPSWebSocketAddress } from "@/api";
 import { useStore } from "@/store/modules";
 import IridiumSocket from "@/plugins/websocket/class-socket";
 import MainTemplate from "@/views/gps/main-template.vue";
@@ -44,31 +44,31 @@ const oResult2Text = {
 };
 
 watch(() => frameStatus.value, (value: string) => {
-  if (value !== "pending") {
-    handleStatusChange("false", depth.value, channel.value);
-    disconnectAllWebsocket();
-    channelList.value = [];
-  } else {
-    handleStatusChange("true", depth.value, channel.value);
-    channelList.value = new Array(channel.value).fill(0).map((item, index) => {
-      return {
-        index,
-        show: false,
-        percentage: 0,
-        status: "" as "success" | "exception" | "warning",
-        prn: ""
-      };
+  // console.info(handleStatusChange(value !== "pending" ? "false" : "true", depth.value, channel.value));
+  handleStatusChange(value !== "pending" ? "false" : "true", depth.value, channel.value)
+    .finally(() => {
+      store.changeCanConnectWebSocket({
+        status: value === "pending"
+      })
+      if (value !== "pending") {
+        disconnectAllWebsocket();
+        channelList.value = [];
+      } else {
+        channelList.value = new Array(channel.value).fill(0).map((item, index) => {
+          return {
+            index,
+            show: false,
+            percentage: 0,
+            status: "" as "success" | "exception" | "warning",
+            prn: ""
+          };
+        });
+        createWebSocket();
+        // channelList.value.forEach(item => {
+        //
+        // });
+      }
     });
-  }
-  channelList.value.forEach(item => {
-    if (value === "pending") {
-      // webSocketInstance = new IridiumSocket
-      // handleStatusChange("true", depth.value, item.index);
-      createWebSocket(item.index);
-    } else {
-      // handleStatusChange("false", depth.value, item.index);
-    }
-  });
 });
 
 onBeforeUnmount(() => {
@@ -79,7 +79,7 @@ onBeforeUnmount(() => {
 onDeactivated(() => {
   clearAllInterval();
   disconnectAllWebsocket();
-})
+});
 
 async function handleStatusChange(Status: string, modelSize: number, channel: number) {
   try {
@@ -87,13 +87,14 @@ async function handleStatusChange(Status: string, modelSize: number, channel: nu
     // const url = `ws://${process.env.NODE_ENV === "production" ? '' : ''}${process.env.VUE_APP_WS_API}ws/iridium_group/`;
     // const url = `ws://${process.env.NODE_ENV === "production" ? window.location.host : ""}${process.env.VUE_APP_WS_API}ws/channel${channel}/`;
     if (Status === "false") {
-      getWebsocketAddress(Status, channel);
-      return;
+      await getWebsocketAddress(Status, channel);
+      return true;
     } else {
-      getWebsocketAddress(
+      await getWebsocketAddress(
         Status,
         channel
-      )
+      );
+      return true;
       //   .finally(() => {
       //   webSocketInstance.push(new IridiumSocket(url, (e: MessageEvent) => {
       //     handleWebsocketMessage(e, channel);
@@ -102,20 +103,25 @@ async function handleStatusChange(Status: string, modelSize: number, channel: nu
     }
   } catch (e) {
     console.error(e);
+    return false;
   }
 }
 
-function createWebSocket(channel: number) {
-  const url = `ws://${process.env.NODE_ENV === "production" ? window.location.host : ""}${process.env.VUE_APP_WS_API}ws/channel${channel}/`;
+function createWebSocket() {
+  // channel: number
+  // const url = `ws://${process.env.NODE_ENV === "production" ? window.location.host : ""}${process.env.VUE_APP_WS_API}ws/channel${channel}/`;
+  const url = `ws://${process.env.NODE_ENV === "production" ? window.location.host : ""}${process.env.VUE_APP_WS_API}ws/Auth/`;
   webSocketInstance.push(new IridiumSocket(url, (e: MessageEvent) => {
-    handleWebsocketMessage(e, channel);
+    handleWebsocketMessage(e);
   }, depth.value));
 }
 
 
-function handleWebsocketMessage(e: MessageEvent, index: number) {
+function handleWebsocketMessage(e: MessageEvent) {
   try {
+    // index: number
     const message = JSON.parse(e.data);
+    const index = message.message?.Channel;
     store.multiplePush(message.message, index);
     // 如果是验证结果这一步，增加一个第5步，结束帧
     if (message.message.Step === 4) {
@@ -206,16 +212,9 @@ function closeModal() {
   >
     <div class="process__gps__image" v-show="frameStatus === 'stopped'">
         <span
-          style="margin: 0 0 0 48px">本系统基于USRP和软件无线电平台GNU Radio实现对铱星星座66颗卫星的实时射频认证。</span><br />
-      <span style="margin: 0 0 0 48px">该系统无需上层密码学认证机制，
-        与铱星通信过程中提取铱星的下行信号IQ采样，
-        利用IQ星座图的时间和空间特性，
-        基于3D卷积神经网络实现对铱星的射频指纹认证，
-        具有通信开销低、计算开销小等优点。</span><br />
-      <span style="margin: 0 0 0 48px">该系统及其关键支撑技术有望在未来卫星互联网时代为用户提供信号层面的带内无感持续卫星认证，
-        作为密码学认证机制的有效补充解决卫星信号伪装带来的安全问题，
-        同时可以解决GPS等全球导航卫星信号的欺骗和重放等攻击，
-        具有广泛的军用和民用前景。</span>
+          style="margin: 0 0 0 48px">本系统基于USRP和软件无线电平台GNU Radio利用gnss-sdr软件定义接收机实现对GPS卫星的实时射频指纹认证。</span><br />
+      <span style="margin: 0 0 0 48px">该系统无需上层密码学认证机制，首先提取GPS导航数据中每个子帧的前导码对应的跟踪阶段的prompt相关器输出的I和Q两路相关结果，然后将I和Q两路结果做成IQ星座图，之后将星座图转换成灰度图，基于GPS信号I/Q星座图的空间分布特征（加时序变化特征）利用变分自编码器（VAE）实现对GPS卫星的实时射频指纹认证。</span><br />
+      <span style="margin: 0 0 0 48px">该系统及其关键支撑技术有望在未来卫星互联网时代为用户提供信号层面的带内无感持续GPS卫星认证，作为密码学认证机制的有效补充解决GPS卫星信号欺骗带来的安全问题，具有广泛的民用前景。</span>
     </div>
     <div class="process__gps__header" v-show="frameStatus === 'pending'">
       <div>channels</div>

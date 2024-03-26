@@ -16,3 +16,7 @@ interface barSingleData {
   id: string,
   result: boolean
 }
+
+interface connectWebsocket {
+  status: boolean;
+}

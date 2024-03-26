@@ -33,23 +33,18 @@ const aDepthList = ref([
   },
   {
     id: 2,
+    label: 2,
+    value: 2
+  },
+  {
+    id: 2,
     label: 3,
     value: 3
   },
   {
-    id: 2,
+    id: 4,
     label: 4,
     value: 4
-  },
-  {
-    id: 4,
-    label: 5,
-    value: 5
-  },
-  {
-    id: 5,
-    label: 7,
-    value: 7
   }
 ]);
 

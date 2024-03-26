@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import BaseChartBackground from "@/components/base-components/base-chart-background.vue";
 import Terminal from "vue-web-terminal";
-import { ref, watch } from "vue";
+import { onBeforeUnmount, ref, watch } from "vue";
 import { useStore } from "@/store/modules";
 import { storeToRefs } from "pinia";
 import IridiumSocket from "@/plugins/websocket/class-socket";
@@ -10,20 +10,26 @@ const store = useStore();
 
 const state = storeToRefs(store);
 
-const frameStatus = state.GPSFrameStatus;
+const oConnectWebSocket = state.oConnectWebSocket;
 
 const terminalInstance = ref();
 
-watch(() => frameStatus.value, (value: string) => {
-  const url = `ws://${process.env.NODE_ENV === "production" ? window.location.host : ""}${process.env.VUE_APP_WS_API}ws/gnss/`;
-  if (value !== "pending") {
+let webSocketInstance: IridiumSocket;
 
+watch(() => oConnectWebSocket.value, (value: connectWebsocket) => {
+  const url = `ws://${process.env.NODE_ENV === "production" ? window.location.host : ""}${process.env.VUE_APP_WS_API}ws/gnss/`;
+  if (!value.status) {
+    webSocketInstance?.dispose();
   } else {
-    new IridiumSocket(url, (e: MessageEvent) => {
+    webSocketInstance = new IridiumSocket(url, (e: MessageEvent) => {
       handleWebsocketMessage(e);
     }, 1)
   }
 });
+
+onBeforeUnmount(() => {
+  webSocketInstance?.dispose();
+})
 
 function handleWebsocketMessage(e: MessageEvent) {
   try {
